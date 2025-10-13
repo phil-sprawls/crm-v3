@@ -59,11 +59,16 @@ export function AccountDetails() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-4 w-4" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => navigate('/')}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-3xl font-bold">{account.team}</h1>
+        </div>
+        <Button onClick={() => navigate(`/accounts/${uid}/edit`)}>
+          Edit Account
         </Button>
-        <h1 className="text-3xl font-bold">{account.team}</h1>
       </div>
 
       <Card>
@@ -75,6 +80,10 @@ export function AccountDetails() {
             <div>
               <label className="text-sm font-medium text-muted-foreground">UID</label>
               <p className="text-sm">{account.uid}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Unique Identifier</label>
+              <p className="text-sm">{account.unique_identifier || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Team</label>
@@ -118,6 +127,10 @@ export function AccountDetails() {
               <p className="text-sm">{account.health_reason || '-'}</p>
             </div>
             <div>
+              <label className="text-sm font-medium text-muted-foreground">North Star Domain</label>
+              <p className="text-sm">{account.north_star_domain || '-'}</p>
+            </div>
+            <div>
               <label className="text-sm font-medium text-muted-foreground">Business or IT</label>
               <p className="text-sm">{account.business_or_it || '-'}</p>
             </div>
@@ -125,9 +138,67 @@ export function AccountDetails() {
               <label className="text-sm font-medium text-muted-foreground">Centerwell or Insurance</label>
               <p className="text-sm">{account.centerwell_or_insurance || '-'}</p>
             </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Use Case</label>
+              <p className="text-sm">{account.use_case || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Use Case Status</label>
+              <p className="text-sm">{account.use_case_status || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Databricks</label>
+              <p className="text-sm">{account.databricks || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Month Onboarded (Databricks)</label>
+              <p className="text-sm">{account.month_onboarded_db || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Snowflake</label>
+              <p className="text-sm">{account.snowflake || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Month Onboarded (Snowflake)</label>
+              <p className="text-sm">{account.month_onboarded_sf || '-'}</p>
+            </div>
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Current Tech Stack</label>
               <p className="text-sm">{account.current_tech_stack || '-'}</p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">AD Groups</label>
+              <p className="text-sm">{account.ad_groups || '-'}</p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">Git Repository</label>
+              <p className="text-sm">
+                {account.git_repo ? (
+                  <a href={account.git_repo} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    {account.git_repo}
+                  </a>
+                ) : '-'}
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">ADO Items</label>
+              <p className="text-sm">
+                {account.associated_ado_items ? (
+                  <a href={account.associated_ado_items} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    {account.associated_ado_items}
+                  </a>
+                ) : '-'}
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">Team Artifacts</label>
+              <p className="text-sm">
+                {account.team_artifacts ? (
+                  <a href={account.team_artifacts} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    {account.team_artifacts}
+                  </a>
+                ) : '-'}
+              </p>
             </div>
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Notes</label>

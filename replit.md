@@ -234,11 +234,17 @@ cd frontend && npx playwright test
   - Built React frontend with TypeScript and Vite
   - Added dark mode support with persistent theme preference
   - Created All Accounts screen with search functionality
-  - Created Account Details screen with comprehensive data display
+  - Created Account Details screen with comprehensive data display showing ALL account fields
+  - Enhanced Account Details to display ADO links, Git repo, AD groups, team artifacts as clickable links
   - Created Admin screen for managing use cases, updates, platforms, and health status
+  - **Added New Account page** with comprehensive form to create accounts with all fields
+  - **Added Edit Account page** to modify all account information (UID is disabled as primary key)
+  - Added "New Account" button to All Accounts page
+  - Added "Edit Account" button to Account Details page
+  - Added routes for /accounts/new and /accounts/:uid/edit
   - Implemented AccountUpdate schemas with optional fields for partial updates
   - Added manual cascade deletion for accounts to handle related records
-  - Fixed API URL configuration to work in Replit environment (uses window.location.origin)
+  - Fixed API URL configuration to work in Replit environment
   - Populated sample data for three demo accounts with full relationships
   - Successfully deployed and verified all functionality
 

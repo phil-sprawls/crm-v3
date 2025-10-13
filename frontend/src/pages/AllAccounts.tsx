@@ -55,6 +55,9 @@ export function AllAccounts() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">All Accounts</h1>
+        <Button onClick={() => navigate('/accounts/new')}>
+          New Account
+        </Button>
       </div>
 
       <div className="relative">
