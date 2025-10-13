@@ -264,6 +264,14 @@ cd frontend && npx playwright test
   - Populated sample data for three demo accounts with full relationships
   - Successfully deployed and verified all functionality
 
+## Running Locally
+
+See **LOCAL_SETUP.md** for complete instructions on:
+- Publishing this project to GitHub from Replit
+- Setting up the development environment on your laptop
+- Running the backend (Python/FastAPI) and frontend (React/Vite) locally
+- Troubleshooting common issues
+
 ## User Preferences
 - Clean, modern UI design with Tailwind CSS
 - Dark mode support for better accessibility
