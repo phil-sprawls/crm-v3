@@ -35,10 +35,13 @@ export function AllAccounts() {
   const loadAccounts = async () => {
     try {
       const response = await accountsApi.getAll();
-      setAccounts(response.data);
-      setFilteredAccounts(response.data);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setAccounts(data);
+      setFilteredAccounts(data);
     } catch (error) {
       console.error('Error loading accounts:', error);
+      setAccounts([]);
+      setFilteredAccounts([]);
     } finally {
       setLoading(false);
     }
@@ -78,7 +81,7 @@ export function AllAccounts() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredAccounts.map((account) => (
+            {Array.isArray(filteredAccounts) && filteredAccounts.map((account) => (
               <tr key={account.uid} className="hover:bg-muted/50">
                 <td className="px-4 py-3 text-sm">{account.team || '-'}</td>
                 <td className="px-4 py-3 text-sm">{account.business_it_area || '-'}</td>
