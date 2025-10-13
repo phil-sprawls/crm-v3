@@ -10,9 +10,10 @@ export function ThemeToggle() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('theme') as Theme) || 'system';
-    setTheme(savedTheme);
-    applyTheme(savedTheme);
+    const savedTheme = (localStorage.getItem('theme') as Theme);
+    const defaultTheme = savedTheme || 'system';
+    setTheme(defaultTheme);
+    applyTheme(defaultTheme);
   }, []);
 
   useEffect(() => {

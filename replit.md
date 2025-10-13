@@ -257,6 +257,7 @@ cd frontend && npx playwright test
     - Added dropdown menu with Light, Dark, and System theme options
     - System option respects and follows OS theme preference
     - Theme selection persists in localStorage with visual checkmarks
+    - Default theme set to System for automatic OS preference matching
   - Implemented AccountUpdate schemas with optional fields for partial updates
   - Added manual cascade deletion for accounts to handle related records
   - Fixed API URL configuration to work in Replit environment
