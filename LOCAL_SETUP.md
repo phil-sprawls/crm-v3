@@ -261,6 +261,12 @@ pip install pytest
 **Solution 3: Platform-specific fixes**
 
 **On Windows:**
+- **watchfiles/uvicorn issue**: If you get "building wheel for watchfiles" error:
+  ```bash
+  pip install uvicorn  # WITHOUT [standard]
+  ```
+  Then update requirements.txt to use `uvicorn==0.24.0` instead of `uvicorn[standard]==0.24.0`
+
 - If `psycopg2-binary` fails, you may need Visual C++ Build Tools
 - Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 - Or try: `pip install psycopg2-binary --only-binary :all:`
