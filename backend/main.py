@@ -1,11 +1,71 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
+from datetime import date as date_type
 import os
 
 from database import create_db_and_tables, get_session, engine
 from models import Account, UseCase, Update, Platform, PrimaryITPartner
+
+
+class AccountUpdate(BaseModel):
+    team: Optional[str] = None
+    business_it_area: Optional[str] = None
+    vp: Optional[str] = None
+    team_admin: Optional[str] = None
+    use_case: Optional[str] = None
+    use_case_status: Optional[str] = None
+    databricks: Optional[str] = None
+    month_onboarded_db: Optional[date_type] = None
+    snowflake: Optional[str] = None
+    month_onboarded_sf: Optional[date_type] = None
+    north_star_domain: Optional[str] = None
+    business_or_it: Optional[str] = None
+    centerwell_or_insurance: Optional[str] = None
+    git_repo: Optional[str] = None
+    unique_identifier: Optional[str] = None
+    associated_ado_items: Optional[str] = None
+    team_artifacts: Optional[str] = None
+    current_tech_stack: Optional[str] = None
+    ad_groups: Optional[str] = None
+    notes: Optional[str] = None
+    csm: Optional[str] = None
+    health: Optional[str] = None
+    health_reason: Optional[str] = None
+
+
+class UseCaseUpdate(BaseModel):
+    account_uid: Optional[str] = None
+    problem: Optional[str] = None
+    solution: Optional[str] = None
+    value: Optional[str] = None
+    leader: Optional[str] = None
+    status: Optional[str] = None
+    enablement_tier: Optional[str] = None
+    platform: Optional[str] = None
+
+
+class UpdateUpdate(BaseModel):
+    account_uid: Optional[str] = None
+    description: Optional[str] = None
+    author: Optional[str] = None
+    platform: Optional[str] = None
+    date: Optional[date_type] = None
+
+
+class PlatformUpdate(BaseModel):
+    account_uid: Optional[str] = None
+    platform_name: Optional[str] = None
+    onboarding_status: Optional[str] = None
+
+
+class PrimaryITPartnerUpdate(BaseModel):
+    account_uid: Optional[str] = None
+    primary_it_partner: Optional[str] = None
+
+
 from sample_data import (
     get_sample_accounts,
     get_sample_use_cases,
@@ -88,7 +148,7 @@ def create_account(account: Account, session: Session = Depends(get_session)):
 
 
 @app.put("/api/accounts/{uid}", response_model=Account)
-def update_account(uid: str, account: Account, session: Session = Depends(get_session)):
+def update_account(uid: str, account: AccountUpdate, session: Session = Depends(get_session)):
     if USE_SAMPLE_DATA:
         raise HTTPException(status_code=400, detail="Cannot update accounts in sample data mode")
     
@@ -96,7 +156,7 @@ def update_account(uid: str, account: Account, session: Session = Depends(get_se
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
     
-    account_data = account.dict(exclude_unset=True)
+    account_data = account.model_dump(exclude_unset=True)
     for key, value in account_data.items():
         setattr(db_account, key, value)
     
@@ -114,6 +174,19 @@ def delete_account(uid: str, session: Session = Depends(get_session)):
     account = session.get(Account, uid)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
+    
+    session.exec(select(UseCase).where(UseCase.account_uid == uid)).all()
+    for use_case in session.exec(select(UseCase).where(UseCase.account_uid == uid)):
+        session.delete(use_case)
+    
+    for update in session.exec(select(Update).where(Update.account_uid == uid)):
+        session.delete(update)
+    
+    for platform in session.exec(select(Platform).where(Platform.account_uid == uid)):
+        session.delete(platform)
+    
+    for partner in session.exec(select(PrimaryITPartner).where(PrimaryITPartner.account_uid == uid)):
+        session.delete(partner)
     
     session.delete(account)
     session.commit()
@@ -142,7 +215,7 @@ def create_use_case(use_case: UseCase, session: Session = Depends(get_session)):
 
 
 @app.put("/api/use-cases/{id}", response_model=UseCase)
-def update_use_case(id: int, use_case: UseCase, session: Session = Depends(get_session)):
+def update_use_case(id: int, use_case: UseCaseUpdate, session: Session = Depends(get_session)):
     if USE_SAMPLE_DATA:
         raise HTTPException(status_code=400, detail="Cannot update use cases in sample data mode")
     
@@ -150,7 +223,7 @@ def update_use_case(id: int, use_case: UseCase, session: Session = Depends(get_s
     if not db_use_case:
         raise HTTPException(status_code=404, detail="Use case not found")
     
-    use_case_data = use_case.dict(exclude_unset=True)
+    use_case_data = use_case.model_dump(exclude_unset=True)
     for key, value in use_case_data.items():
         setattr(db_use_case, key, value)
     
@@ -196,7 +269,7 @@ def create_update(update: Update, session: Session = Depends(get_session)):
 
 
 @app.put("/api/updates/{id}", response_model=Update)
-def update_update(id: int, update: Update, session: Session = Depends(get_session)):
+def update_update(id: int, update: UpdateUpdate, session: Session = Depends(get_session)):
     if USE_SAMPLE_DATA:
         raise HTTPException(status_code=400, detail="Cannot update updates in sample data mode")
     
@@ -204,7 +277,7 @@ def update_update(id: int, update: Update, session: Session = Depends(get_sessio
     if not db_update:
         raise HTTPException(status_code=404, detail="Update not found")
     
-    update_data = update.dict(exclude_unset=True)
+    update_data = update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_update, key, value)
     
@@ -250,7 +323,7 @@ def create_platform(platform: Platform, session: Session = Depends(get_session))
 
 
 @app.put("/api/platforms/{id}", response_model=Platform)
-def update_platform(id: int, platform: Platform, session: Session = Depends(get_session)):
+def update_platform(id: int, platform: PlatformUpdate, session: Session = Depends(get_session)):
     if USE_SAMPLE_DATA:
         raise HTTPException(status_code=400, detail="Cannot update platforms in sample data mode")
     
@@ -258,7 +331,7 @@ def update_platform(id: int, platform: Platform, session: Session = Depends(get_
     if not db_platform:
         raise HTTPException(status_code=404, detail="Platform not found")
     
-    platform_data = platform.dict(exclude_unset=True)
+    platform_data = platform.model_dump(exclude_unset=True)
     for key, value in platform_data.items():
         setattr(db_platform, key, value)
     
@@ -309,7 +382,7 @@ def create_primary_it_partner(partner: PrimaryITPartner, session: Session = Depe
 
 
 @app.put("/api/primary-it-partners/{id}", response_model=PrimaryITPartner)
-def update_primary_it_partner(id: int, partner: PrimaryITPartner, session: Session = Depends(get_session)):
+def update_primary_it_partner(id: int, partner: PrimaryITPartnerUpdate, session: Session = Depends(get_session)):
     if USE_SAMPLE_DATA:
         raise HTTPException(status_code=400, detail="Cannot update primary IT partners in sample data mode")
     
@@ -317,7 +390,7 @@ def update_primary_it_partner(id: int, partner: PrimaryITPartner, session: Sessi
     if not db_partner:
         raise HTTPException(status_code=404, detail="Primary IT Partner not found")
     
-    partner_data = partner.dict(exclude_unset=True)
+    partner_data = partner.model_dump(exclude_unset=True)
     for key, value in partner_data.items():
         setattr(db_partner, key, value)
     
