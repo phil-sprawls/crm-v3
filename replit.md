@@ -249,6 +249,14 @@ cd frontend && npx playwright test
     - All sections display existing items with summary and allow editing without navigation
     - Confirmation dialogs for deletion operations
     - Automatic data refresh after edit/delete operations
+  - **Improved loading experience**:
+    - Account Details page shows animated spinner during data loading
+    - Enhanced "Account not found" state with "Return to Accounts" button
+  - **Enhanced theme toggle**:
+    - Replaced moon/sun icon with settings gear icon
+    - Added dropdown menu with Light, Dark, and System theme options
+    - System option respects and follows OS theme preference
+    - Theme selection persists in localStorage with visual checkmarks
   - Implemented AccountUpdate schemas with optional fields for partial updates
   - Added manual cascade deletion for accounts to handle related records
   - Fixed API URL configuration to work in Replit environment
