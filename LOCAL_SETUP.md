@@ -233,6 +233,88 @@ cd frontend
 npm install
 ```
 
+### Issue: pip install -r requirements.txt fails
+This is a common issue! Here are solutions by platform:
+
+**Solution 1: Update pip first**
+```bash
+# Upgrade pip to latest version
+python -m pip install --upgrade pip
+
+# Then try installing again
+pip install -r requirements.txt
+```
+
+**Solution 2: Install packages one by one to identify the problem**
+```bash
+pip install fastapi
+pip install uvicorn[standard]
+pip install sqlmodel
+pip install psycopg2-binary
+pip install python-dotenv
+pip install pydantic
+pip install pydantic-settings
+pip install httpx
+pip install pytest
+```
+
+**Solution 3: Platform-specific fixes**
+
+**On Windows:**
+- If `psycopg2-binary` fails, you may need Visual C++ Build Tools
+- Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+- Or try: `pip install psycopg2-binary --only-binary :all:`
+
+**On Mac (M1/M2/M3):**
+- If `psycopg2-binary` fails:
+```bash
+brew install postgresql
+pip install psycopg2-binary
+```
+
+**On Linux:**
+- If `psycopg2-binary` fails, install PostgreSQL dev packages:
+```bash
+# Ubuntu/Debian
+sudo apt-get install libpq-dev python3-dev
+
+# Fedora/RHEL
+sudo yum install postgresql-devel python3-devel
+
+# Then install requirements
+pip install -r requirements.txt
+```
+
+**Solution 4: Use alternative packages (if psycopg2-binary still fails)**
+Edit `requirements.txt` and replace `psycopg2-binary` with `psycopg2`:
+```
+psycopg2==2.9.9
+```
+
+**Solution 5: Create a fresh virtual environment**
+```bash
+# Delete old venv
+rm -rf venv  # or rmdir /s venv on Windows
+
+# Create new one
+python -m venv venv
+
+# Activate it
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Upgrade pip
+python -m pip install --upgrade pip
+
+# Install requirements
+pip install -r requirements.txt
+```
+
+**Solution 6: Check Python version**
+```bash
+python --version
+```
+Make sure it's Python 3.11 or higher. If not, install the correct version.
+
 ### Issue: Frontend can't connect to backend
 **Solution**: Make sure the backend is running on port 8000 and check `frontend/src/lib/api.ts`
 
