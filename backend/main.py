@@ -5,6 +5,10 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import date as date_type
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from database import create_db_and_tables, get_session, engine
 from models import Account, UseCase, Update, Platform, PrimaryITPartner
