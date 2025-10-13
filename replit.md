@@ -228,13 +228,19 @@ cd frontend && npx playwright test
 - Reusable UI components following shadcn/UI patterns
 
 ## Recent Changes
-- **2024-10-13**: Initial application setup
-  - Created PostgreSQL database with all tables
-  - Implemented FastAPI backend with full CRUD endpoints
-  - Built React frontend with TypeScript
-  - Added dark mode support
-  - Created All Accounts, Account Details, and Admin screens
-  - Populated sample data for demo purposes
+- **2025-10-13**: Initial application setup and deployment
+  - Created PostgreSQL database with all tables (Accounts, Use_Cases, Updates, Platforms, Primary_IT_Partner)
+  - Implemented FastAPI backend with full CRUD endpoints including partial update support
+  - Built React frontend with TypeScript and Vite
+  - Added dark mode support with persistent theme preference
+  - Created All Accounts screen with search functionality
+  - Created Account Details screen with comprehensive data display
+  - Created Admin screen for managing use cases, updates, platforms, and health status
+  - Implemented AccountUpdate schemas with optional fields for partial updates
+  - Added manual cascade deletion for accounts to handle related records
+  - Fixed API URL configuration to work in Replit environment (uses window.location.origin)
+  - Populated sample data for three demo accounts with full relationships
+  - Successfully deployed and verified all functionality
 
 ## User Preferences
 - Clean, modern UI design with Tailwind CSS
