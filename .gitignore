@@ -6,11 +6,12 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Only ignore Python lib folders, not all lib folders
+**/venv/lib/
+**/env/lib/
 lib64/
 parts/
 sdist/
