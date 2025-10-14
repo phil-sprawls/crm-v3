@@ -95,7 +95,14 @@ export function EditAccount() {
     
     setSaving(true);
     try {
-      await accountsApi.update(uid, formData);
+      // Convert empty strings to undefined for date fields
+      const updateData = {
+        ...formData,
+        month_onboarded_db: formData.month_onboarded_db || undefined,
+        month_onboarded_sf: formData.month_onboarded_sf || undefined,
+      };
+      
+      await accountsApi.update(uid, updateData);
       navigate(`/accounts/${uid}`);
     } catch (error) {
       console.error('Error updating account:', error);

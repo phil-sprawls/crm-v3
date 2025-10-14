@@ -47,7 +47,14 @@ export function NewAccount() {
     e.preventDefault();
     setSaving(true);
     try {
-      await accountsApi.create(formData);
+      // Convert empty strings to undefined for date fields
+      const createData = {
+        ...formData,
+        month_onboarded_db: formData.month_onboarded_db || undefined,
+        month_onboarded_sf: formData.month_onboarded_sf || undefined,
+      };
+      
+      await accountsApi.create(createData);
       navigate('/');
     } catch (error) {
       console.error('Error creating account:', error);
