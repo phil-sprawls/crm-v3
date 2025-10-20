@@ -4,6 +4,172 @@ Complete guide to deploy the IT Platform CRM to Azure for development/testing.
 
 ---
 
+## 🚀 Quick Start (Already Have PostgreSQL Database)
+
+**If you already have an Azure PostgreSQL database provisioned**, follow these minimal steps:
+
+### Step 1: Get Your Database Connection String
+
+Format:
+```
+postgresql://USERNAME:PASSWORD@SERVER.postgres.database.azure.com:5432/DATABASE?sslmode=require
+```
+
+Example:
+```
+postgresql://crmadmin:MyPassword123@myserver.postgres.database.azure.com:5432/crm_db?sslmode=require
+```
+
+### Step 2: Deploy Backend (5 minutes)
+
+```bash
+# Login to Azure
+az login
+
+# Set variables
+RESOURCE_GROUP="crm-dev-rg"  # Use your existing or new resource group
+BACKEND_APP_NAME="crm-backend-dev"  # Must be globally unique
+DATABASE_URL="your-postgresql-connection-string-here"
+
+# Create App Service Plan (if you don't have one)
+az appservice plan create \
+  --name crm-dev-plan \
+  --resource-group $RESOURCE_GROUP \
+  --sku B1 \
+  --is-linux
+
+# Create Backend App Service
+az webapp create \
+  --resource-group $RESOURCE_GROUP \
+  --plan crm-dev-plan \
+  --name $BACKEND_APP_NAME \
+  --runtime "PYTHON:3.11"
+
+# Configure environment variables
+az webapp config appsettings set \
+  --resource-group $RESOURCE_GROUP \
+  --name $BACKEND_APP_NAME \
+  --settings \
+    DATABASE_URL="$DATABASE_URL" \
+    USE_SAMPLE_DATA="false" \
+    SCM_DO_BUILD_DURING_DEPLOYMENT="true"
+
+# Set startup command
+az webapp config set \
+  --resource-group $RESOURCE_GROUP \
+  --name $BACKEND_APP_NAME \
+  --startup-file "gunicorn -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 main:app"
+
+# Deploy backend code
+cd backend
+zip -r backend.zip .
+az webapp deployment source config-zip \
+  --resource-group $RESOURCE_GROUP \
+  --name $BACKEND_APP_NAME \
+  --src backend.zip
+
+# Get backend URL
+echo "Backend URL: https://${BACKEND_APP_NAME}.azurewebsites.net"
+```
+
+### Step 3: Update Frontend API URL
+
+Edit `frontend/src/lib/api.ts`:
+
+```typescript
+const getApiBaseUrl = () => {
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+  
+  if (hostname.includes('replit.dev')) {
+    return `${protocol}//${hostname}:8000`;
+  }
+  
+  if (hostname.includes('azurewebsites.net')) {
+    return 'https://crm-backend-dev.azurewebsites.net';  // ← YOUR BACKEND URL
+  }
+  
+  return 'http://localhost:8000';
+};
+```
+
+### Step 4: Update Backend CORS
+
+Edit `backend/main.py` and add your frontend URL:
+
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5000",
+        "https://crm-frontend-dev.azurewebsites.net",  # ← YOUR FRONTEND URL
+        "*"  # Remove in production
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+### Step 5: Deploy Frontend (5 minutes)
+
+```bash
+FRONTEND_APP_NAME="crm-frontend-dev"  # Must be globally unique
+
+# Build frontend
+cd frontend
+npm install
+npm run build
+
+# Create Frontend App Service
+az webapp create \
+  --resource-group $RESOURCE_GROUP \
+  --plan crm-dev-plan \
+  --name $FRONTEND_APP_NAME \
+  --runtime "NODE:20-lts"
+
+# Deploy frontend
+cd frontend
+zip -r frontend.zip dist/
+az webapp deployment source config-zip \
+  --resource-group $RESOURCE_GROUP \
+  --name $FRONTEND_APP_NAME \
+  --src frontend.zip
+
+# Get frontend URL
+echo "Frontend URL: https://${FRONTEND_APP_NAME}.azurewebsites.net"
+```
+
+### Step 6: Test Your App
+
+```bash
+# Backend API
+curl https://crm-backend-dev.azurewebsites.net/api/accounts
+
+# Frontend
+open https://crm-frontend-dev.azurewebsites.net
+```
+
+### Troubleshooting
+
+**View backend logs:**
+```bash
+az webapp log tail --resource-group $RESOURCE_GROUP --name $BACKEND_APP_NAME
+```
+
+**Common issues:**
+- **Database connection failed**: Check firewall rules allow Azure services (0.0.0.0-0.0.0.0)
+- **Application Error**: Check logs above
+- **CORS errors**: Verify frontend URL in backend CORS settings
+
+---
+
+## 📖 Full Deployment Guide
+
+For complete instructions including PostgreSQL setup, Azure AD authentication, and CI/CD, see sections below.
+
+---
+
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Azure PostgreSQL Setup](#azure-postgresql-setup)
