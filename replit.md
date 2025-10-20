@@ -272,6 +272,17 @@ See **LOCAL_SETUP.md** for complete instructions on:
 - Running the backend (Python/FastAPI) and frontend (React/Vite) locally
 - Troubleshooting common issues
 
+## Azure Deployment
+
+See **AZURE_DEPLOYMENT.md** for complete instructions on:
+- Setting up Azure PostgreSQL Flexible Server
+- Deploying backend (FastAPI) to Azure App Service
+- Deploying frontend (React) to Azure App Service
+- Configuring Azure AD authentication with JWT tokens
+- Setting up CI/CD with GitHub Actions
+- Monitoring and troubleshooting
+- Cost estimation and resource management
+
 ## User Preferences
 - Clean, modern UI design with Tailwind CSS
 - Dark mode support for better accessibility
