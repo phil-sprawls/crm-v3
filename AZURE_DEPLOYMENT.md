@@ -8,17 +8,40 @@ Complete guide to deploy the IT Platform CRM to Azure for development/testing.
 
 **If you already have an Azure PostgreSQL database provisioned**, follow these minimal steps:
 
+### ℹ️ About Resource Groups
+
+**What is a Resource Group?**  
+A resource group is just an organizational container in Azure - think of it as a folder for related resources. **All Azure resources require one**, but:
+
+✅ **You likely already have one** - Check with: `az group list --output table`  
+✅ **Your PostgreSQL database is already in one** - Use the same group  
+✅ **IT/DevOps may have created one** - Ask your team  
+✅ **Creating one is simple** - Just one command if needed  
+
+**Why other apps don't mention it:**  
+Many apps use existing resource groups created by IT teams, or deployment tools create them automatically behind the scenes. It's not complex - just a name you need to provide.
+
+---
+
 ### Step 1: Get Your Database Connection String
 
-Format:
+**Find which resource group your PostgreSQL database is in:**
+```bash
+az postgres flexible-server list --output table
+# Shows: Name, ResourceGroup, Location, etc.
+```
+
+**Connection String Format:**
 ```
 postgresql://USERNAME:PASSWORD@SERVER.postgres.database.azure.com:5432/DATABASE?sslmode=require
 ```
 
-Example:
+**Example:**
 ```
 postgresql://crmadmin:MyPassword123@myserver.postgres.database.azure.com:5432/crm_db?sslmode=require
 ```
+
+**Tip:** Use the same resource group as your database - keeps everything organized together!
 
 ### Step 2: Deploy Backend (5 minutes)
 
@@ -26,12 +49,19 @@ postgresql://crmadmin:MyPassword123@myserver.postgres.database.azure.com:5432/cr
 # Login to Azure
 az login
 
-# Set variables
-RESOURCE_GROUP="crm-dev-rg"  # Use your existing or new resource group
+# List your existing resource groups (you likely already have one)
+az group list --output table
+
+# Set variables - USE AN EXISTING RESOURCE GROUP or create new one
+RESOURCE_GROUP="crm-dev-rg"  # ← Replace with your existing resource group name
 BACKEND_APP_NAME="crm-backend-dev"  # Must be globally unique
 DATABASE_URL="your-postgresql-connection-string-here"
 
+# Only if you need a new resource group (skip if using existing)
+# az group create --name $RESOURCE_GROUP --location eastus
+
 # Create App Service Plan (if you don't have one)
+# Check existing plans: az appservice plan list --output table
 az appservice plan create \
   --name crm-dev-plan \
   --resource-group $RESOURCE_GROUP \
