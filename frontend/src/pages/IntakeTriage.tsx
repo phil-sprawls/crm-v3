@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/Card';
 import { Button } from '../components/Button';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
-import { Eye, Tag, X } from 'lucide-react';
+import { Eye, Tag, X, Search } from 'lucide-react';
 
 const API_BASE_URL = (() => {
   const hostname = window.location.hostname;
@@ -50,6 +50,7 @@ export function IntakeTriage() {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<IntakeRequest | null>(null);
   const [showStateSelector, setShowStateSelector] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const loadRequests = async () => {
     try {
@@ -119,6 +120,7 @@ export function IntakeTriage() {
       await axios.post(`${API_BASE_URL}/api/intake-requests/${selectedRequest.id}/states/${stateId}`);
       await loadRequestStates(selectedRequest.id);
       setShowStateSelector(false);
+      setSelectedRequest(null);
     } catch (error) {
       console.error('Error assigning state:', error);
     }
@@ -132,6 +134,24 @@ export function IntakeTriage() {
       console.error('Error removing state:', error);
     }
   };
+
+  const filteredRequests = requests.filter(request => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const helpTypes = parseHelpTypes(request.help_types);
+    const formattedHelpTypes = formatHelpTypes(helpTypes).toLowerCase();
+    
+    return (
+      request.title.toLowerCase().includes(searchLower) ||
+      (request.description || '').toLowerCase().includes(searchLower) ||
+      (request.functional_area || '').toLowerCase().includes(searchLower) ||
+      (request.platform || '').toLowerCase().includes(searchLower) ||
+      (request.submitted_for || '').toLowerCase().includes(searchLower) ||
+      (request.dri_contact || '').toLowerCase().includes(searchLower) ||
+      formattedHelpTypes.includes(searchLower)
+    );
+  });
 
   if (loading) {
     return (
@@ -150,15 +170,26 @@ export function IntakeTriage() {
         </Button>
       </div>
 
-      {requests.length === 0 ? (
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Search requests by title, area, platform, help type..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
+      {filteredRequests.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No requests submitted yet.
+            {searchTerm ? 'No requests match your search.' : 'No requests submitted yet.'}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {requests.map(request => {
+          {filteredRequests.map(request => {
             const states = requestStates[request.id] || [];
             const helpTypes = parseHelpTypes(request.help_types);
             
