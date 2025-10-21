@@ -129,6 +129,24 @@ USE_SAMPLE_DATA = os.getenv("USE_SAMPLE_DATA", "false").lower() == "true"
 def on_startup():
     create_db_and_tables()
     
+    with Session(engine) as session:
+        # Always seed default request states regardless of USE_SAMPLE_DATA setting
+        existing_states = session.exec(select(RequestState)).first()
+        if not existing_states:
+            from datetime import datetime
+            default_states = [
+                RequestState(name="New", color="#3b82f6", description="Newly submitted request", created_at=datetime.utcnow()),
+                RequestState(name="In Review", color="#f59e0b", description="Under review by admin", created_at=datetime.utcnow()),
+                RequestState(name="Assigned", color="#8b5cf6", description="Assigned to a team member", created_at=datetime.utcnow()),
+                RequestState(name="In Progress", color="#06b6d4", description="Work has started", created_at=datetime.utcnow()),
+                RequestState(name="Blocked", color="#ef4444", description="Waiting on external dependency", created_at=datetime.utcnow()),
+                RequestState(name="Completed", color="#10b981", description="Request has been fulfilled", created_at=datetime.utcnow()),
+                RequestState(name="Rejected", color="#6b7280", description="Request has been declined", created_at=datetime.utcnow()),
+            ]
+            for state in default_states:
+                session.add(state)
+            session.commit()
+    
     if not USE_SAMPLE_DATA:
         with Session(engine) as session:
             existing_accounts = session.exec(select(Account)).first()
@@ -143,22 +161,6 @@ def on_startup():
                     session.add(platform)
                 for partner in get_sample_primary_it_partners():
                     session.add(partner)
-                session.commit()
-            
-            existing_states = session.exec(select(RequestState)).first()
-            if not existing_states:
-                from datetime import datetime
-                default_states = [
-                    RequestState(name="New", color="#3b82f6", description="Newly submitted request", created_at=datetime.utcnow()),
-                    RequestState(name="In Review", color="#f59e0b", description="Under review by admin", created_at=datetime.utcnow()),
-                    RequestState(name="Assigned", color="#8b5cf6", description="Assigned to a team member", created_at=datetime.utcnow()),
-                    RequestState(name="In Progress", color="#06b6d4", description="Work has started", created_at=datetime.utcnow()),
-                    RequestState(name="Blocked", color="#ef4444", description="Waiting on external dependency", created_at=datetime.utcnow()),
-                    RequestState(name="Completed", color="#10b981", description="Request has been fulfilled", created_at=datetime.utcnow()),
-                    RequestState(name="Rejected", color="#6b7280", description="Request has been declined", created_at=datetime.utcnow()),
-                ]
-                for state in default_states:
-                    session.add(state)
                 session.commit()
 
 
