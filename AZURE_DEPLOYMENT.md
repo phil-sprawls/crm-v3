@@ -45,20 +45,66 @@ postgresql://crmadmin:MyPassword123@myserver.postgres.database.azure.com:5432/cr
 
 ### Step 2: Deploy Backend (5 minutes)
 
+Choose **Option A** (use existing service) or **Option B** (create new service):
+
+---
+
+#### **Option A: Deploy to Existing Backend Service** ⭐ (Recommended if you already have one)
+
 ```bash
 # Login to Azure
 az login
 
-# List your existing resource groups (you likely already have one)
-az group list --output table
+# List your existing App Services to find your backend service name
+az webapp list --output table
 
-# Set variables - USE AN EXISTING RESOURCE GROUP or create new one
-RESOURCE_GROUP="crm-dev-rg"  # ← Replace with your existing resource group name
-BACKEND_APP_NAME="crm-backend-dev"  # Must be globally unique
+# Set variables
+RESOURCE_GROUP="your-resource-group-name"      # Your existing resource group
+BACKEND_APP_NAME="your-existing-backend-name"  # Your existing backend App Service name
 DATABASE_URL="your-postgresql-connection-string-here"
 
-# Only if you need a new resource group (skip if using existing)
-# az group create --name $RESOURCE_GROUP --location eastus
+# Configure/Update environment variables
+az webapp config appsettings set \
+  --resource-group $RESOURCE_GROUP \
+  --name $BACKEND_APP_NAME \
+  --settings \
+    DATABASE_URL="$DATABASE_URL" \
+    USE_SAMPLE_DATA="false" \
+    SCM_DO_BUILD_DURING_DEPLOYMENT="true"
+
+# Update startup command (if needed)
+az webapp config set \
+  --resource-group $RESOURCE_GROUP \
+  --name $BACKEND_APP_NAME \
+  --startup-file "gunicorn -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 main:app"
+
+# Deploy backend code
+cd backend
+zip -r backend.zip .
+az webapp deployment source config-zip \
+  --resource-group $RESOURCE_GROUP \
+  --name $BACKEND_APP_NAME \
+  --src backend.zip
+
+# Get backend URL
+echo "Backend URL: https://${BACKEND_APP_NAME}.azurewebsites.net"
+```
+
+---
+
+#### **Option B: Create New Backend Service** (Skip if using Option A)
+
+```bash
+# Login to Azure
+az login
+
+# List your existing resource groups
+az group list --output table
+
+# Set variables
+RESOURCE_GROUP="crm-dev-rg"       # Your existing resource group name
+BACKEND_APP_NAME="crm-backend-dev"  # Must be globally unique (choose a new name)
+DATABASE_URL="your-postgresql-connection-string-here"
 
 # Create App Service Plan (if you don't have one)
 # Check existing plans: az appservice plan list --output table
@@ -101,6 +147,8 @@ az webapp deployment source config-zip \
 # Get backend URL
 echo "Backend URL: https://${BACKEND_APP_NAME}.azurewebsites.net"
 ```
+
+---
 
 ### Step 3: Update Frontend API URL
 
