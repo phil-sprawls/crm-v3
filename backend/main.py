@@ -494,9 +494,19 @@ def create_intake_request(request: IntakeRequestCreate, session: Session = Depen
     session.commit()
     session.refresh(db_request)
     
+    # TODO: Implement email notification using Azure Communication Services
+    # Set ADMIN_EMAIL and AZURE_COMMUNICATION_CONNECTION_STRING environment variables
     admin_email = os.getenv("ADMIN_EMAIL")
-    if admin_email:
-        pass
+    azure_comm_connection = os.getenv("AZURE_COMMUNICATION_CONNECTION_STRING")
+    
+    if admin_email and azure_comm_connection:
+        try:
+            # Email notification will be sent here using Azure Communication Services
+            # Example subject: f"New Intake Request: {db_request.title}"
+            # Example body: Request details with link to triage view
+            pass
+        except Exception as e:
+            print(f"Failed to send email notification: {e}")
     
     return db_request
 

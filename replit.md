@@ -105,6 +105,8 @@ The workflow automatically runs both backend and frontend:
 ### Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string (auto-configured in Replit)
 - `USE_SAMPLE_DATA` - Set to "true" for in-memory sample data mode (default: false)
+- `ADMIN_EMAIL` - Email address to receive intake request notifications (optional)
+- `AZURE_COMMUNICATION_CONNECTION_STRING` - Azure Communication Services connection string for email (optional)
 
 ### Sample Data
 On first startup, the application automatically populates the database with sample accounts, use cases, updates, platforms, and IT partners.
@@ -228,6 +230,17 @@ cd frontend && npx playwright test
 - Reusable UI components following shadcn/UI patterns
 
 ## Recent Changes
+- **2025-10-21**: Added intake request system
+  - Created intake form with multi-select card-based UI for help types
+  - Added intake triage view for admins to review and manage requests
+  - Implemented request state management system with custom states
+  - Added AdminStates page for creating/editing/deleting custom states
+  - New database tables: intake_requests, request_states, request_state_assignments
+  - Default states: New, In Review, Assigned, In Progress, Blocked, Completed, Rejected
+  - Sample functional areas: Finance, Marketing, Sales, Operations, HR, IT, Product, Engineering, Customer Success, Legal, R&D, Supply Chain
+  - Email notifications placeholder for Azure Communication Services (requires ADMIN_EMAIL and AZURE_COMMUNICATION_CONNECTION_STRING)
+  - Navigation updated with Submit Request and Intake Triage links
+  - Access control: public form submission, admin-only triage view
 - **2025-10-13**: Initial application setup and deployment
   - Created PostgreSQL database with all tables (Accounts, Use_Cases, Updates, Platforms, Primary_IT_Partner)
   - Implemented FastAPI backend with full CRUD endpoints including partial update support
