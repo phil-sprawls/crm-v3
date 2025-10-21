@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from database import create_db_and_tables, get_session, engine
-from models import Account, UseCase, Update, Platform, PrimaryITPartner
+from models import Account, UseCase, Update, Platform, PrimaryITPartner, IntakeRequest, RequestState, RequestStateAssignment
 
 
 class AccountUpdate(BaseModel):
@@ -70,6 +70,40 @@ class PrimaryITPartnerUpdate(BaseModel):
     primary_it_partner: Optional[str] = None
 
 
+class IntakeRequestCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    has_it_partner: bool = False
+    dri_contact: Optional[str] = None
+    submitted_for: Optional[str] = None
+    functional_area: Optional[str] = None
+    help_types: Optional[str] = None
+    platform: Optional[str] = None
+
+
+class IntakeRequestUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    has_it_partner: Optional[bool] = None
+    dri_contact: Optional[str] = None
+    submitted_for: Optional[str] = None
+    functional_area: Optional[str] = None
+    help_types: Optional[str] = None
+    platform: Optional[str] = None
+
+
+class RequestStateCreate(BaseModel):
+    name: str
+    color: Optional[str] = None
+    description: Optional[str] = None
+
+
+class RequestStateUpdate(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
+    description: Optional[str] = None
+
+
 from sample_data import (
     get_sample_accounts,
     get_sample_use_cases,
@@ -109,6 +143,22 @@ def on_startup():
                     session.add(platform)
                 for partner in get_sample_primary_it_partners():
                     session.add(partner)
+                session.commit()
+            
+            existing_states = session.exec(select(RequestState)).first()
+            if not existing_states:
+                from datetime import datetime
+                default_states = [
+                    RequestState(name="New", color="#3b82f6", description="Newly submitted request", created_at=datetime.utcnow()),
+                    RequestState(name="In Review", color="#f59e0b", description="Under review by admin", created_at=datetime.utcnow()),
+                    RequestState(name="Assigned", color="#8b5cf6", description="Assigned to a team member", created_at=datetime.utcnow()),
+                    RequestState(name="In Progress", color="#06b6d4", description="Work has started", created_at=datetime.utcnow()),
+                    RequestState(name="Blocked", color="#ef4444", description="Waiting on external dependency", created_at=datetime.utcnow()),
+                    RequestState(name="Completed", color="#10b981", description="Request has been fulfilled", created_at=datetime.utcnow()),
+                    RequestState(name="Rejected", color="#6b7280", description="Request has been declined", created_at=datetime.utcnow()),
+                ]
+                for state in default_states:
+                    session.add(state)
                 session.commit()
 
 
@@ -416,3 +466,212 @@ def delete_primary_it_partner(id: int, session: Session = Depends(get_session)):
     session.delete(partner)
     session.commit()
     return {"ok": True}
+
+
+@app.get("/api/intake-requests", response_model=List[IntakeRequest])
+def get_intake_requests(session: Session = Depends(get_session)):
+    requests = session.exec(select(IntakeRequest).order_by(IntakeRequest.created_at.desc())).all()
+    return requests
+
+
+@app.get("/api/intake-requests/{id}", response_model=IntakeRequest)
+def get_intake_request(id: int, session: Session = Depends(get_session)):
+    request = session.get(IntakeRequest, id)
+    if not request:
+        raise HTTPException(status_code=404, detail="Intake request not found")
+    return request
+
+
+@app.post("/api/intake-requests", response_model=IntakeRequest)
+def create_intake_request(request: IntakeRequestCreate, session: Session = Depends(get_session)):
+    from datetime import datetime
+    
+    db_request = IntakeRequest(**request.model_dump())
+    db_request.created_at = datetime.utcnow()
+    db_request.updated_at = datetime.utcnow()
+    
+    session.add(db_request)
+    session.commit()
+    session.refresh(db_request)
+    
+    admin_email = os.getenv("ADMIN_EMAIL")
+    if admin_email:
+        pass
+    
+    return db_request
+
+
+@app.put("/api/intake-requests/{id}", response_model=IntakeRequest)
+def update_intake_request(id: int, request: IntakeRequestUpdate, session: Session = Depends(get_session)):
+    from datetime import datetime
+    
+    db_request = session.get(IntakeRequest, id)
+    if not db_request:
+        raise HTTPException(status_code=404, detail="Intake request not found")
+    
+    request_data = request.model_dump(exclude_unset=True)
+    for key, value in request_data.items():
+        setattr(db_request, key, value)
+    
+    db_request.updated_at = datetime.utcnow()
+    
+    session.add(db_request)
+    session.commit()
+    session.refresh(db_request)
+    return db_request
+
+
+@app.delete("/api/intake-requests/{id}")
+def delete_intake_request(id: int, session: Session = Depends(get_session)):
+    db_request = session.get(IntakeRequest, id)
+    if not db_request:
+        raise HTTPException(status_code=404, detail="Intake request not found")
+    
+    session.exec(select(RequestStateAssignment).where(RequestStateAssignment.request_id == id)).all()
+    for assignment in session.exec(select(RequestStateAssignment).where(RequestStateAssignment.request_id == id)):
+        session.delete(assignment)
+    
+    session.delete(db_request)
+    session.commit()
+    return {"ok": True}
+
+
+@app.get("/api/request-states", response_model=List[RequestState])
+def get_request_states(session: Session = Depends(get_session)):
+    states = session.exec(select(RequestState)).all()
+    return states
+
+
+@app.get("/api/request-states/{id}", response_model=RequestState)
+def get_request_state(id: int, session: Session = Depends(get_session)):
+    state = session.get(RequestState, id)
+    if not state:
+        raise HTTPException(status_code=404, detail="Request state not found")
+    return state
+
+
+@app.post("/api/request-states", response_model=RequestState)
+def create_request_state(state: RequestStateCreate, session: Session = Depends(get_session)):
+    from datetime import datetime
+    
+    db_state = RequestState(**state.model_dump())
+    db_state.created_at = datetime.utcnow()
+    
+    session.add(db_state)
+    session.commit()
+    session.refresh(db_state)
+    return db_state
+
+
+@app.put("/api/request-states/{id}", response_model=RequestState)
+def update_request_state(id: int, state: RequestStateUpdate, session: Session = Depends(get_session)):
+    db_state = session.get(RequestState, id)
+    if not db_state:
+        raise HTTPException(status_code=404, detail="Request state not found")
+    
+    state_data = state.model_dump(exclude_unset=True)
+    for key, value in state_data.items():
+        setattr(db_state, key, value)
+    
+    session.add(db_state)
+    session.commit()
+    session.refresh(db_state)
+    return db_state
+
+
+@app.delete("/api/request-states/{id}")
+def delete_request_state(id: int, session: Session = Depends(get_session)):
+    db_state = session.get(RequestState, id)
+    if not db_state:
+        raise HTTPException(status_code=404, detail="Request state not found")
+    
+    for assignment in session.exec(select(RequestStateAssignment).where(RequestStateAssignment.state_id == id)):
+        session.delete(assignment)
+    
+    session.delete(db_state)
+    session.commit()
+    return {"ok": True}
+
+
+@app.get("/api/intake-requests/{request_id}/states", response_model=List[RequestState])
+def get_request_states_for_intake(request_id: int, session: Session = Depends(get_session)):
+    assignments = session.exec(
+        select(RequestStateAssignment).where(RequestStateAssignment.request_id == request_id)
+    ).all()
+    
+    state_ids = [assignment.state_id for assignment in assignments]
+    states = []
+    for state_id in state_ids:
+        state = session.get(RequestState, state_id)
+        if state:
+            states.append(state)
+    
+    return states
+
+
+@app.post("/api/intake-requests/{request_id}/states/{state_id}")
+def assign_state_to_request(request_id: int, state_id: int, session: Session = Depends(get_session)):
+    from datetime import datetime
+    
+    db_request = session.get(IntakeRequest, request_id)
+    if not db_request:
+        raise HTTPException(status_code=404, detail="Intake request not found")
+    
+    db_state = session.get(RequestState, state_id)
+    if not db_state:
+        raise HTTPException(status_code=404, detail="Request state not found")
+    
+    existing = session.exec(
+        select(RequestStateAssignment).where(
+            RequestStateAssignment.request_id == request_id,
+            RequestStateAssignment.state_id == state_id
+        )
+    ).first()
+    
+    if existing:
+        return {"ok": True, "message": "State already assigned"}
+    
+    assignment = RequestStateAssignment(
+        request_id=request_id,
+        state_id=state_id,
+        assigned_at=datetime.utcnow()
+    )
+    
+    session.add(assignment)
+    session.commit()
+    return {"ok": True}
+
+
+@app.delete("/api/intake-requests/{request_id}/states/{state_id}")
+def remove_state_from_request(request_id: int, state_id: int, session: Session = Depends(get_session)):
+    assignment = session.exec(
+        select(RequestStateAssignment).where(
+            RequestStateAssignment.request_id == request_id,
+            RequestStateAssignment.state_id == state_id
+        )
+    ).first()
+    
+    if not assignment:
+        raise HTTPException(status_code=404, detail="State assignment not found")
+    
+    session.delete(assignment)
+    session.commit()
+    return {"ok": True}
+
+
+@app.get("/api/functional-areas")
+def get_functional_areas():
+    return [
+        "Finance",
+        "Marketing",
+        "Sales",
+        "Operations",
+        "Human Resources",
+        "IT",
+        "Product",
+        "Engineering",
+        "Customer Success",
+        "Legal",
+        "Research & Development",
+        "Supply Chain"
+    ]

@@ -72,3 +72,38 @@ class PrimaryITPartner(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     account_uid: str = Field(foreign_key="accounts.uid")
     primary_it_partner: Optional[str] = None
+
+
+class IntakeRequest(SQLModel, table=True):
+    __tablename__ = "intake_requests"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    title: str
+    description: Optional[str] = None
+    has_it_partner: bool = False
+    dri_contact: Optional[str] = None
+    submitted_for: Optional[str] = None
+    functional_area: Optional[str] = None
+    help_types: Optional[str] = None
+    platform: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class RequestState(SQLModel, table=True):
+    __tablename__ = "request_states"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    color: Optional[str] = None
+    description: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class RequestStateAssignment(SQLModel, table=True):
+    __tablename__ = "request_state_assignments"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    request_id: int = Field(foreign_key="intake_requests.id")
+    state_id: int = Field(foreign_key="request_states.id")
+    assigned_at: datetime = Field(default_factory=datetime.utcnow)
