@@ -14,6 +14,12 @@ export function Layout() {
               <Link to="/" className="text-sm font-medium hover:underline">
                 Accounts
               </Link>
+              <Link to="/intake" className="text-sm font-medium hover:underline">
+                Submit Request
+              </Link>
+              <Link to="/admin/intake-triage" className="text-sm font-medium hover:underline">
+                Intake Triage
+              </Link>
               <Link to="/admin" className="text-sm font-medium hover:underline">
                 Admin
               </Link>
