@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/Card';
-import { MessageCircle, Hammer, PlusCircle, Settings, Cloud } from 'lucide-react';
+import { MessageCircle, Hammer, PlusCircle, Settings, Cloud, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE_URL = (() => {
@@ -73,6 +73,7 @@ export function IntakeForm() {
   });
   const [selectedHelpTypes, setSelectedHelpTypes] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/functional-areas`)
@@ -118,8 +119,7 @@ export function IntakeForm() {
         help_types: JSON.stringify(selectedHelpTypes),
       });
       
-      alert('Request submitted successfully! Our team will review it soon.');
-      navigate('/');
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Error submitting request:', error);
       alert('Failed to submit request. Please try again.');
@@ -344,6 +344,29 @@ export function IntakeForm() {
           </Button>
         </div>
       </form>
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-6 pb-6 text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="h-16 w-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">Request Submitted Successfully!</h3>
+                <p className="text-muted-foreground">
+                  Our team will review your request soon. You'll receive an email confirmation once it has been reviewed.
+                </p>
+              </div>
+              <Button onClick={() => navigate('/')} className="w-full">
+                Return to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
