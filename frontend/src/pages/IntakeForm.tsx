@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/Card';
-import { MessageCircle, Hammer, PlusCircle, Settings, Cloud, CheckCircle } from 'lucide-react';
+import { MessageCircle, Hammer, PlusCircle, Settings, Cloud, CheckCircle, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE_URL = (() => {
@@ -74,6 +74,8 @@ export function IntakeForm() {
   const [selectedHelpTypes, setSelectedHelpTypes] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/functional-areas`)
@@ -108,7 +110,8 @@ export function IntakeForm() {
     e.preventDefault();
     
     if (selectedHelpTypes.length === 0) {
-      alert('Please select at least one option for "What Can We Help You With"');
+      setErrorMessage('Please select at least one option for "What Can We Help You With"');
+      setShowErrorModal(true);
       return;
     }
     
@@ -122,7 +125,8 @@ export function IntakeForm() {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Error submitting request:', error);
-      alert('Failed to submit request. Please try again.');
+      setErrorMessage('Failed to submit request. Please try again.');
+      setShowErrorModal(true);
     } finally {
       setSubmitting(false);
     }
@@ -268,6 +272,7 @@ export function IntakeForm() {
                       value="true"
                       checked={formData.has_it_partner === true}
                       onChange={handleChange}
+                      required
                       className="mr-2"
                     />
                     Yes
@@ -362,6 +367,27 @@ export function IntakeForm() {
               </div>
               <Button onClick={() => navigate('/')} className="w-full">
                 Return to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-6 pb-6 text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="h-16 w-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                  <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">Unable to Submit Request</h3>
+                <p className="text-muted-foreground">{errorMessage}</p>
+              </div>
+              <Button onClick={() => setShowErrorModal(false)} className="w-full">
+                OK
               </Button>
             </CardContent>
           </Card>
