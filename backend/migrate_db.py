@@ -13,6 +13,10 @@ Usage:
 import os
 import sys
 from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def migrate_database(drop_tables=False):
     """Run database migration to create all tables"""
