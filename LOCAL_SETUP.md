@@ -105,6 +105,8 @@ Replace `yourpassword` with your PostgreSQL password.
 
 The application will automatically create tables and populate sample data on first run.
 
+**⚠️ IMPORTANT: If you previously ran this application with an older database schema, see the [Database Migration section](#database-migration-for-existing-users) below before starting the server.**
+
 ### Step 6: Start the Backend Server
 
 ```bash
@@ -323,6 +325,150 @@ Make sure it's Python 3.11 or higher. If not, install the correct version.
 
 ### Issue: Frontend can't connect to backend
 **Solution**: Make sure the backend is running on port 8000 and check `frontend/src/lib/api.ts`
+
+---
+
+## Database Migration for Existing Users
+
+**If you previously ran this application and now have new features (like the Intake Request system), your database schema is outdated.** The new version includes three additional tables:
+- `intake_requests` - User-submitted platform assistance requests
+- `request_states` - Customizable workflow states (New, In Review, Assigned, etc.)
+- `request_state_assignments` - Many-to-many relationship between requests and states
+
+### Option 1: Fresh Start (Recommended - Easiest)
+
+**This deletes all existing data and creates a fresh database with sample data.**
+
+```bash
+# Stop the backend server (Ctrl+C if running)
+
+# Drop and recreate the database
+psql postgres
+DROP DATABASE crm_db;
+CREATE DATABASE crm_db;
+\q
+
+# Start the backend server - it will recreate all tables with sample data
+cd backend
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+The application will automatically:
+- Create all tables (including new intake request tables)
+- Populate with sample data
+- Set up default request states
+
+### Option 2: Manual Migration (Keep Existing Data)
+
+**Use this if you have important data you want to preserve.**
+
+```bash
+# Connect to your database
+psql postgresql://postgres:yourpassword@localhost:5432/crm_db
+
+# Create the new tables manually
+CREATE TABLE request_states (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL UNIQUE,
+    description VARCHAR,
+    color VARCHAR,
+    is_active BOOLEAN DEFAULT TRUE,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE intake_requests (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    description TEXT,
+    functional_area VARCHAR NOT NULL,
+    submitter_name VARCHAR NOT NULL,
+    submitter_email VARCHAR NOT NULL,
+    has_it_partner BOOLEAN NOT NULL,
+    it_partner_name VARCHAR,
+    it_partner_email VARCHAR,
+    selected_help_types TEXT NOT NULL,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE request_state_assignments (
+    id SERIAL PRIMARY KEY,
+    request_id INTEGER NOT NULL REFERENCES intake_requests(id) ON DELETE CASCADE,
+    state_id INTEGER NOT NULL REFERENCES request_states(id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    assigned_by VARCHAR,
+    notes TEXT,
+    UNIQUE(request_id, state_id)
+);
+
+# Insert default request states
+INSERT INTO request_states (name, description, color, display_order) VALUES
+    ('New', 'Request has been submitted and is awaiting review', '#3b82f6', 1),
+    ('In Review', 'Request is being reviewed by the team', '#8b5cf6', 2),
+    ('Assigned', 'Request has been assigned to a team member', '#0ea5e9', 3),
+    ('In Progress', 'Work on the request has started', '#f59e0b', 4),
+    ('Blocked', 'Request is blocked and cannot proceed', '#ef4444', 5),
+    ('Completed', 'Request has been successfully completed', '#10b981', 6),
+    ('Rejected', 'Request has been rejected', '#6b7280', 7);
+
+\q
+```
+
+Then start the backend server normally.
+
+### Option 3: Use Sample Data Mode (Testing Only)
+
+**For testing without a database:**
+
+Edit `backend/.env`:
+```bash
+USE_SAMPLE_DATA=true
+# DATABASE_URL not needed in this mode
+```
+
+This runs the app with in-memory sample data (resets on restart).
+
+### Verifying the Migration
+
+After migration, test the new features:
+
+1. **Start the servers** (backend and frontend)
+2. **Visit the app**: http://localhost:5000
+3. **Test intake requests**:
+   - Navigate to "Submit Request" in the menu
+   - Fill out and submit a test request
+   - Navigate to "Intake Triage" (admin view) to see the request
+4. **Test state management**:
+   - Go to Admin → Admin States
+   - View/edit the default states
+
+**Check database tables:**
+```bash
+psql postgresql://postgres:yourpassword@localhost:5432/crm_db
+
+# List all tables
+\dt
+
+# Should show:
+# - accounts
+# - use_cases
+# - updates
+# - platforms
+# - primary_it_partner
+# - intake_requests (NEW)
+# - request_states (NEW)
+# - request_state_assignments (NEW)
+
+# Check sample intake requests
+SELECT * FROM intake_requests;
+
+# Check default states
+SELECT * FROM request_states ORDER BY display_order;
+
+\q
+```
 
 ---
 

@@ -283,6 +283,7 @@ See **LOCAL_SETUP.md** for complete instructions on:
 - Publishing this project to GitHub from Replit
 - Setting up the development environment on your laptop
 - Running the backend (Python/FastAPI) and frontend (React/Vite) locally
+- **Database migration for existing users** - If you previously ran this app locally, you'll need to update your database schema to include the new intake request tables
 - Troubleshooting common issues
 
 ## Azure Deployment
