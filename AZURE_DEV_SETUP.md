@@ -28,9 +28,22 @@ Complete guide to set up your IT Platform CRM development environment on Azure.
 
 ## Step 1: Create Environment Configuration File
 
-Create a `.env` file in your `backend` directory with all necessary configuration:
+Copy the template file and fill in your values:
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Copy template to create your .env file
+cp .env.template .env
+
+# Edit the file with your actual values
+# (Use your preferred text editor)
+```
 
 ### Local Development `.env`
+
+Example configuration for local development:
 
 ```bash
 # Database Configuration

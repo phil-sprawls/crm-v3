@@ -108,6 +108,8 @@ The workflow automatically runs both backend and frontend:
 - `ADMIN_EMAIL` - Email address to receive intake request notifications (optional)
 - `AZURE_COMMUNICATION_CONNECTION_STRING` - Azure Communication Services connection string for email (optional)
 
+**Note:** A template file is provided at `backend/.env.template` - copy this to `backend/.env` and fill in your values for local development.
+
 ### Sample Data
 On first startup, the application automatically populates the database with sample accounts, use cases, updates, platforms, and IT partners.
 

@@ -91,7 +91,14 @@ pip install -r requirements.txt
 
 ### Step 4: Configure Environment Variables
 
-Create a `.env` file in the `backend` directory:
+Copy the template file and fill in your database connection:
+
+```bash
+# In the backend directory
+cp .env.template .env
+```
+
+Then edit `backend/.env` with your database connection:
 
 ```bash
 # backend/.env

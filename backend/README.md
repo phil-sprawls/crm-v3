@@ -63,7 +63,13 @@ python seed_azure_db.py
 
 ## Environment Variables
 
-Create a `.env` file with the following variables:
+Copy the template and fill in your values:
+
+```bash
+cp .env.template .env
+```
+
+Then edit `.env` with the following variables:
 
 ### Required
 ```bash
