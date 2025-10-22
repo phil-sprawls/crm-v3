@@ -15,7 +15,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ## Database Scripts
 
 ### migrate_db.py
-Creates new database tables for the intake request system.
+Creates all database tables for the CRM application.
 
 **Usage:**
 ```bash
@@ -23,16 +23,23 @@ python migrate_db.py
 ```
 
 **What it does:**
-- Creates `request_states` table
-- Creates `intake_requests` table
-- Creates `request_state_assignments` table
+- Creates all 8 database tables:
+  - `accounts` - Main account/team information
+  - `use_cases` - Use cases for each account
+  - `updates` - Activity updates
+  - `platforms` - Platform onboarding status
+  - `primary_it_partners` - IT partner assignments
+  - `request_states` - Workflow states for intake requests
+  - `intake_requests` - User-submitted assistance requests
+  - `request_state_assignments` - Request-to-state relationships
 - Inserts 7 default request states
-- Safe to run multiple times (skips if tables exist)
+- Safe to run multiple times (uses CREATE TABLE IF NOT EXISTS)
 
 **When to use:**
+- Setting up a new Azure PostgreSQL database
+- Setting up local development database
 - Upgrading from older version without intake request tables
-- Setting up a new database
-- Local development database migration
+- Recovering from database corruption
 
 ---
 

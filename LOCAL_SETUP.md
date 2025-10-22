@@ -382,9 +382,9 @@ python migrate_db.py
 ```
 
 The script will:
-- ✅ Create the 3 new tables
+- ✅ Create all 8 database tables (if they don't exist)
 - ✅ Insert 7 default request states
-- ✅ Skip if tables already exist
+- ✅ Safe to run multiple times (uses IF NOT EXISTS)
 - ✅ Keep all your existing data
 
 Then start the backend server normally.

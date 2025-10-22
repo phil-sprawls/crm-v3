@@ -1,6 +1,6 @@
 """
-Database Migration Script for Intake Request System
-Run this script to add the new tables to an existing database.
+Database Migration Script - Creates All Tables
+Run this script to create all database tables for the CRM application.
 
 Usage:
     python migrate_db.py
@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def migrate_database():
-    """Create new tables and insert default states"""
+    """Create all database tables and insert default states"""
     
     # Get database URL
     database_url = os.getenv('DATABASE_URL')
@@ -31,6 +31,97 @@ def migrate_database():
     try:
         with engine.connect() as conn:
             print("✅ Connected successfully")
+            
+            # Create accounts table
+            print("\n📋 Creating accounts table...")
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS accounts (
+                    uid VARCHAR PRIMARY KEY,
+                    team VARCHAR,
+                    business_it_area VARCHAR,
+                    vp VARCHAR,
+                    team_admin VARCHAR,
+                    use_case VARCHAR,
+                    use_case_status VARCHAR,
+                    databricks VARCHAR,
+                    month_onboarded_db DATE,
+                    snowflake VARCHAR,
+                    month_onboarded_sf DATE,
+                    north_star_domain VARCHAR,
+                    business_or_it VARCHAR,
+                    centerwell_or_insurance VARCHAR,
+                    git_repo VARCHAR,
+                    unique_identifier VARCHAR,
+                    associated_ado_items VARCHAR,
+                    team_artifacts VARCHAR,
+                    current_tech_stack VARCHAR,
+                    ad_groups VARCHAR,
+                    notes VARCHAR,
+                    csm VARCHAR,
+                    health VARCHAR,
+                    health_reason VARCHAR
+                )
+            """))
+            conn.commit()
+            print("✅ accounts table created")
+            
+            # Create use_cases table
+            print("\n📋 Creating use_cases table...")
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS use_cases (
+                    id SERIAL PRIMARY KEY,
+                    account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
+                    problem VARCHAR,
+                    solution VARCHAR,
+                    value VARCHAR,
+                    leader VARCHAR,
+                    status VARCHAR,
+                    enablement_tier VARCHAR,
+                    platform VARCHAR
+                )
+            """))
+            conn.commit()
+            print("✅ use_cases table created")
+            
+            # Create updates table
+            print("\n📋 Creating updates table...")
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS updates (
+                    id SERIAL PRIMARY KEY,
+                    account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
+                    description VARCHAR,
+                    author VARCHAR,
+                    platform VARCHAR,
+                    date DATE
+                )
+            """))
+            conn.commit()
+            print("✅ updates table created")
+            
+            # Create platforms table
+            print("\n📋 Creating platforms table...")
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS platforms (
+                    id SERIAL PRIMARY KEY,
+                    account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
+                    platform_name VARCHAR,
+                    onboarding_status VARCHAR
+                )
+            """))
+            conn.commit()
+            print("✅ platforms table created")
+            
+            # Create primary_it_partners table
+            print("\n📋 Creating primary_it_partners table...")
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS primary_it_partners (
+                    id SERIAL PRIMARY KEY,
+                    account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
+                    primary_it_partner VARCHAR
+                )
+            """))
+            conn.commit()
+            print("✅ primary_it_partners table created")
             
             # Create request_states table
             print("\n📋 Creating request_states table...")
@@ -109,7 +200,12 @@ def migrate_database():
                 print("✅ Default states inserted")
             
             print("\n🎉 Migration completed successfully!")
-            print("\nNew tables created:")
+            print("\nAll tables created:")
+            print("  - accounts")
+            print("  - use_cases")
+            print("  - updates")
+            print("  - platforms")
+            print("  - primary_it_partners")
             print("  - request_states")
             print("  - intake_requests")
             print("  - request_state_assignments")
@@ -125,7 +221,7 @@ def migrate_database():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Database Migration for Intake Request System")
+    print("Database Migration - Create All Tables")
     print("=" * 60)
     
     success = migrate_database()
@@ -133,8 +229,9 @@ if __name__ == "__main__":
     if success:
         print("\n✅ All done! Your database is ready.")
         print("\nNext steps:")
-        print("  1. Start your backend server: uvicorn main:app --reload")
-        print("  2. Test the new features in the UI")
+        print("  1. Seed with sample data: python seed_azure_db.py")
+        print("  2. Start your backend server: uvicorn main:app --reload")
+        print("  3. Test the application in the UI")
     else:
         print("\n❌ Migration failed. Please check the error above.")
         exit(1)

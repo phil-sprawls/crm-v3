@@ -190,14 +190,40 @@ python migrate_db.py
 Expected output:
 ```
 ============================================================
-Database Migration for Intake Request System
+Database Migration - Create All Tables
 ============================================================
 🔌 Connecting to database...
 ✅ Connected successfully
+📋 Creating accounts table...
+✅ accounts table created
+📋 Creating use_cases table...
+✅ use_cases table created
+📋 Creating updates table...
+✅ updates table created
+📋 Creating platforms table...
+✅ platforms table created
+📋 Creating primary_it_partners table...
+✅ primary_it_partners table created
 📋 Creating request_states table...
 ✅ request_states table created
-...
+📋 Creating intake_requests table...
+✅ intake_requests table created
+📋 Creating request_state_assignments table...
+✅ request_state_assignments table created
+🔍 Checking for existing states...
+📝 Inserting default request states...
+✅ Default states inserted
 🎉 Migration completed successfully!
+
+All tables created:
+  - accounts
+  - use_cases
+  - updates
+  - platforms
+  - primary_it_partners
+  - request_states
+  - intake_requests
+  - request_state_assignments
 ```
 
 ### 3b. Seed with Sample Data
