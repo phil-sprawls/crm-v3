@@ -43,6 +43,27 @@ python migrate_db.py
 
 ---
 
+### fix_intake_columns.py
+Fixes intake_requests table to add missing columns from schema updates.
+
+**Usage:**
+```bash
+python fix_intake_columns.py
+```
+
+**What it does:**
+- Checks for missing columns in intake_requests table
+- Adds `dri_contact`, `submitted_for`, and `help_types` columns if missing
+- Safe to run multiple times (uses ALTER TABLE IF NOT EXISTS)
+- Verifies all columns after completion
+
+**When to use:**
+- Upgrading from older version that had different column names
+- After getting "column does not exist" errors during seeding
+- Database was partially migrated
+
+---
+
 ### seed_azure_db.py
 Seeds Azure PostgreSQL database with sample data.
 
