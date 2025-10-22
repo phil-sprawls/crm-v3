@@ -2,15 +2,28 @@
 
 FastAPI backend for IT Platform CRM application.
 
-## Quick Start
+## 🚀 Quick Start (Local Machine)
 
+See **`QUICKSTART.md`** for step-by-step setup guide!
+
+**TL;DR:**
 ```bash
-# Install dependencies
+# 1. Setup
+cd backend
+cp .env.template .env          # Edit .env with your database credentials
+python -m venv venv
+source venv/bin/activate       # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Run development server
+# 2. Database
+python migrate_db.py --drop    # Create tables
+python seed_azure_db.py        # Add sample data
+
+# 3. Run
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+**Access API docs:** http://localhost:8000/docs
 
 ## Database Scripts
 
