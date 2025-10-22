@@ -19,11 +19,15 @@ Creates all database tables for the CRM application.
 
 **Usage:**
 ```bash
+# Safe mode - preserves existing data
 python migrate_db.py
+
+# Drop and recreate all tables (DESTRUCTIVE - deletes all data)
+python migrate_db.py --drop
 ```
 
 **What it does:**
-- Creates all 8 database tables:
+- Creates all 8 database tables with exact schema from models.py:
   - `accounts` - Main account/team information
   - `use_cases` - Use cases for each account
   - `updates` - Activity updates
@@ -33,36 +37,14 @@ python migrate_db.py
   - `intake_requests` - User-submitted assistance requests
   - `request_state_assignments` - Request-to-state relationships
 - Inserts 7 default request states
-- Safe to run multiple times (uses CREATE TABLE IF NOT EXISTS)
+- Safe mode: uses CREATE TABLE IF NOT EXISTS (preserves data)
+- Drop mode: drops all tables and recreates from scratch
 
 **When to use:**
-- Setting up a new Azure PostgreSQL database
-- Setting up local development database
-- Upgrading from older version without intake request tables
-- Recovering from database corruption
+- **Safe mode**: Setting up new database, adding missing tables
+- **Drop mode**: Fixing column mismatches, starting fresh, recovering from corruption
 
----
-
-### fix_intake_columns.py
-Fixes intake_requests table to add missing columns from schema updates.
-
-**Usage:**
-```bash
-python fix_intake_columns.py
-```
-
-**What it does:**
-- Checks for missing columns in intake_requests table
-- Adds `dri_contact`, `submitted_for`, and `help_types` columns if missing
-- Safe to run multiple times (uses ALTER TABLE IF NOT EXISTS)
-- Verifies all columns after completion
-
-**When to use:**
-- Upgrading from older version that had different column names
-- After getting "column does not exist" errors during seeding
-- Database was partially migrated
-
----
+**⚠️ Warning:** `--drop` flag will delete ALL data! Use with caution.
 
 ### seed_azure_db.py
 Seeds Azure PostgreSQL database with sample data.

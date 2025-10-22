@@ -183,17 +183,27 @@ venv\Scripts\activate     # Windows
 # Set your Azure DATABASE_URL in .env file
 echo "DATABASE_URL=your-azure-connection-string" >> .env
 
-# Run migration
+# Safe mode - create tables if they don't exist (preserves existing data)
 python migrate_db.py
+
+# OR if you have column mismatches or need a fresh start:
+# Drop and recreate all tables (DELETES ALL DATA - use with caution!)
+python migrate_db.py --drop
 ```
+
+**When to use `--drop` flag:**
+- Column mismatch errors (e.g., "column does not exist")
+- Upgrading from older schema version
+- Need to start with a clean database
+- ⚠️ **Warning:** This deletes ALL data! Backup first if needed.
 
 Expected output:
 ```
 ============================================================
-Database Migration - Create All Tables
+Database Migration - IT Platform CRM
 ============================================================
-🔌 Connecting to database...
-✅ Connected successfully
+🚀 Starting database migration...
+📍 Connecting to: your-server.postgres.database.azure.com:5432/dev_psprawls
 📋 Creating accounts table...
 ✅ accounts table created
 📋 Creating use_cases table...

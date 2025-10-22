@@ -232,6 +232,12 @@ cd frontend && npx playwright test
 - Reusable UI components following shadcn/UI patterns
 
 ## Recent Changes
+- **2025-10-22**: Enhanced migration script
+  - Added `--drop` flag to migrate_db.py for recreating tables with correct schema
+  - Ensures all columns from models.py are included in CREATE TABLE statements
+  - Renamed platforms table to platforms_crm to avoid conflicts with existing database tables
+  - Safe mode (default) preserves data, drop mode recreates tables from scratch
+  - Eliminated need for separate column fix scripts
 - **2025-10-21**: Added intake request system
   - Created intake form with multi-select card-based UI for help types
   - Added intake triage view for admins to review and manage requests
