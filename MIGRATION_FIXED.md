@@ -143,7 +143,7 @@ python migrate_db.py
 python seed_azure_db.py
 
 # 4. Start backend
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 7006 --reload
 ```
 
 ## Key Changes Made

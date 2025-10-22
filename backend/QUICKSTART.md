@@ -55,10 +55,10 @@ python seed_azure_db.py
 ## Step 4: Run Backend (30 seconds)
 
 ```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 7006 --reload
 ```
 
-**Test it:** Open http://localhost:8000/docs in your browser
+**Test it:** Open http://localhost:7006/docs in your browser
 
 ## Step 5: Run Frontend (1 minute)
 
@@ -80,7 +80,7 @@ npm run dev
 - [ ] Virtual environment activated
 - [ ] Dependencies installed
 - [ ] Database migrated and seeded
-- [ ] Backend running on http://localhost:8000
+- [ ] Backend running on http://localhost:7006
 - [ ] Frontend running on http://localhost:5000
 - [ ] You can see sample data in the app!
 
@@ -104,7 +104,7 @@ cd backend
 ```bash
 # Recreate tables with correct schema
 cd backend
-python migrate_db.py --drop
+python migrate_db.py
 python seed_azure_db.py
 ```
 

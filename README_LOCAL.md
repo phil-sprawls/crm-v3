@@ -54,7 +54,7 @@ python seed_azure_db.py         # Adds sample data
 ```bash
 cd backend
 source venv/bin/activate
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 7006 --reload
 ```
 
 **Terminal 2 - Frontend:**
@@ -67,7 +67,7 @@ npm run dev
 ### Step 4: Access
 
 - **Application:** http://localhost:5000
-- **API Docs:** http://localhost:8000/docs
+- **API Docs:** http://localhost:7006/docs
 
 ---
 

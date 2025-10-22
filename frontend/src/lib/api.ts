@@ -9,7 +9,8 @@ const getApiBaseUrl = () => {
     return `${protocol}//${hostname}:8000`;
   }
   
-  return 'http://localhost:8000';
+  // Use port 7006 for local development
+  return 'http://localhost:7006';
 };
 
 const API_BASE_URL = getApiBaseUrl();

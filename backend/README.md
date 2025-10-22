@@ -20,10 +20,10 @@ python migrate_db.py           # Create all tables (drops existing!)
 python seed_azure_db.py        # Add sample data
 
 # 3. Run
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 7006 --reload
 ```
 
-**Access API docs:** http://localhost:8000/docs
+**Access API docs:** http://localhost:7006/docs
 
 ## Database Scripts
 
