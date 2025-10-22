@@ -38,7 +38,7 @@ postgresql://USERNAME:PASSWORD@SERVER.postgres.database.azure.com:5432/DATABASE?
 
 **Example:**
 ```
-postgresql://crmadmin:MyPassword123@myserver.postgres.database.azure.com:5432/crm_db?sslmode=require
+postgresql://crmadmin:MyPassword123@myserver.postgres.database.azure.com:5432/dev_psprawls?sslmode=require
 ```
 
 **Tip:** Use the same resource group as your database - keeps everything organized together!
@@ -329,7 +329,7 @@ az postgres flexible-server create \
 az postgres flexible-server db create \
   --resource-group $RESOURCE_GROUP \
   --server-name $PG_SERVER_NAME \
-  --database-name crm_db
+  --database-name dev_psprawls
 ```
 
 ### Step 3: Configure Firewall Rules
@@ -357,7 +357,7 @@ az postgres flexible-server firewall-rule create \
 
 ```bash
 # Your connection string will be:
-DATABASE_URL="postgresql://${ADMIN_USER}:${ADMIN_PASSWORD}@${PG_SERVER_NAME}.postgres.database.azure.com:5432/crm_db?sslmode=require"
+DATABASE_URL="postgresql://${ADMIN_USER}:${ADMIN_PASSWORD}@${PG_SERVER_NAME}.postgres.database.azure.com:5432/dev_psprawls?sslmode=require"
 
 # Save this - you'll need it for backend configuration
 echo $DATABASE_URL
@@ -365,7 +365,7 @@ echo $DATABASE_URL
 
 **Example:**
 ```
-postgresql://crmadmin:YourSecurePassword123!@crm-postgres-dev.postgres.database.azure.com:5432/crm_db?sslmode=require
+postgresql://crmadmin:YourSecurePassword123!@crm-postgres-dev.postgres.database.azure.com:5432/dev_psprawls?sslmode=require
 ```
 
 ---
@@ -758,7 +758,7 @@ az webapp config appsettings set \
   --resource-group $RESOURCE_GROUP \
   --name $BACKEND_APP_NAME \
   --settings \
-    DATABASE_URL="postgresql://user:pass@server.postgres.database.azure.com:5432/crm_db?sslmode=require" \
+    DATABASE_URL="postgresql://user:pass@server.postgres.database.azure.com:5432/dev_psprawls?sslmode=require" \
     USE_SAMPLE_DATA="false" \
     APP_CLIENT_ID="your-app-client-id" \
     TENANT_ID="your-tenant-id" \
@@ -933,7 +933,7 @@ az postgres flexible-server execute \
   -n $PG_SERVER_NAME \
   -u $ADMIN_USER \
   -p "$ADMIN_PASSWORD" \
-  -d crm_db \
+  -d dev_psprawls \
   --querytext "SELECT 1;"
 
 # Check firewall rules

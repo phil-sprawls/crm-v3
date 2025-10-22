@@ -73,7 +73,7 @@ Then edit `.env` with the following variables:
 
 ### Required
 ```bash
-DATABASE_URL=postgresql://user:pass@host:5432/db
+DATABASE_URL=postgresql://user:pass@host:5432/dev_psprawls
 USE_SAMPLE_DATA=false
 ```
 

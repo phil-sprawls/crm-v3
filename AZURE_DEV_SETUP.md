@@ -47,7 +47,7 @@ Example configuration for local development:
 
 ```bash
 # Database Configuration
-DATABASE_URL=postgresql://username:password@localhost:5432/crm_db
+DATABASE_URL=postgresql://username:password@localhost:5432/dev_psprawls
 USE_SAMPLE_DATA=false
 
 # Azure AD Authentication (Optional - for JWT)
@@ -69,7 +69,7 @@ For Azure App Service, set these as **Application Settings**:
 
 ```bash
 # Required
-DATABASE_URL=postgresql://username:password@server.postgres.database.azure.com:5432/crm_db?sslmode=require
+DATABASE_URL=postgresql://username:password@server.postgres.database.azure.com:5432/dev_psprawls?sslmode=require
 USE_SAMPLE_DATA=false
 
 # Optional - JWT Authentication
@@ -118,7 +118,7 @@ LOCATION="eastus"
 SERVER_NAME="crm-db-dev-$(date +%s)"  # Adds timestamp for uniqueness
 ADMIN_USER="crmadmin"
 ADMIN_PASSWORD="YourSecurePassword123!"  # Change this!
-DATABASE_NAME="crm_db"
+DATABASE_NAME="dev_psprawls"
 
 # Create resource group (if needed)
 az group create --name $RESOURCE_GROUP --location $LOCATION

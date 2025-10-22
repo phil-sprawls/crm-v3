@@ -57,18 +57,18 @@ Replace `YOUR_USERNAME` with your GitHub username.
 ```bash
 # On Mac/Linux
 psql postgres
-CREATE DATABASE crm_db;
+CREATE DATABASE dev_psprawls;
 \q
 
 # On Windows (using Command Prompt)
 psql -U postgres
-CREATE DATABASE crm_db;
+CREATE DATABASE dev_psprawls;
 \q
 ```
 
 3. **Note your connection string** (you'll need it in Step 4):
-   - Format: `postgresql://username:password@localhost:5432/crm_db`
-   - Example: `postgresql://postgres:yourpassword@localhost:5432/crm_db`
+   - Format: `postgresql://username:password@localhost:5432/dev_psprawls`
+   - Example: `postgresql://postgres:yourpassword@localhost:5432/dev_psprawls`
 
 ### Step 3: Set Up Backend (FastAPI)
 
@@ -102,7 +102,7 @@ Then edit `backend/.env` with your database connection:
 
 ```bash
 # backend/.env
-DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/crm_db
+DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/dev_psprawls
 USE_SAMPLE_DATA=false
 ```
 
@@ -351,8 +351,8 @@ Make sure it's Python 3.11 or higher. If not, install the correct version.
 
 # Drop and recreate the database
 psql postgres
-DROP DATABASE crm_db;
-CREATE DATABASE crm_db;
+DROP DATABASE dev_psprawls;
+CREATE DATABASE dev_psprawls;
 \q
 
 # Start the backend server - it will recreate all tables with sample data
@@ -393,7 +393,7 @@ Then start the backend server normally.
 
 ```bash
 # Connect to your database
-psql postgresql://postgres:yourpassword@localhost:5432/crm_db
+psql postgresql://postgres:yourpassword@localhost:5432/dev_psprawls
 
 # Create the new tables manually
 CREATE TABLE request_states (
@@ -474,7 +474,7 @@ After migration, test the new features:
 
 **Check database tables:**
 ```bash
-psql postgresql://postgres:yourpassword@localhost:5432/crm_db
+psql postgresql://postgres:yourpassword@localhost:5432/dev_psprawls
 
 # List all tables
 \dt
