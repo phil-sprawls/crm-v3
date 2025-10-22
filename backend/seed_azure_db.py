@@ -133,14 +133,14 @@ def seed_database():
             if not state_count or state_count == 0:
                 print("📝 Inserting default request states...")
                 conn.execute(text("""
-                    INSERT INTO request_states (name, description, color, display_order) VALUES
-                        ('New', 'Request has been submitted and is awaiting review', '#3b82f6', 1),
-                        ('In Review', 'Request is being reviewed by the team', '#8b5cf6', 2),
-                        ('Assigned', 'Request has been assigned to a team member', '#0ea5e9', 3),
-                        ('In Progress', 'Work on the request has started', '#f59e0b', 4),
-                        ('Blocked', 'Request is blocked and cannot proceed', '#ef4444', 5),
-                        ('Completed', 'Request has been successfully completed', '#10b981', 6),
-                        ('Rejected', 'Request has been rejected', '#6b7280', 7)
+                    INSERT INTO request_states (name, description, color) VALUES
+                        ('New', 'Request has been submitted and is awaiting review', '#3b82f6'),
+                        ('In Review', 'Request is being reviewed by the team', '#8b5cf6'),
+                        ('Assigned', 'Request has been assigned to a team member', '#0ea5e9'),
+                        ('In Progress', 'Work on the request has started', '#f59e0b'),
+                        ('Blocked', 'Request is blocked and cannot proceed', '#ef4444'),
+                        ('Completed', 'Request has been successfully completed', '#10b981'),
+                        ('Rejected', 'Request has been rejected', '#6b7280')
                 """))
                 conn.commit()
                 print("✅ Default request states inserted")
@@ -149,24 +149,25 @@ def seed_database():
             
             # Insert sample intake requests
             print("\n📝 Inserting sample intake requests...")
+            today = datetime.now()
             conn.execute(text("""
-                INSERT INTO intake_requests (title, description, functional_area, submitter_name, 
-                                            submitter_email, has_it_partner, selected_help_types,
-                                            submitted_at)
+                INSERT INTO intake_requests (title, description, functional_area, dri_contact, 
+                                            submitted_for, has_it_partner, help_types, platform,
+                                            created_at, updated_at)
                 VALUES
                     ('Need Databricks Access for Sales Analytics', 
                      'Our sales team needs access to Databricks for building sales forecasting models',
                      'Sales', 'Jennifer Lee', 'jennifer.lee@company.com', false, 
-                     'Platform Access,Training',
-                     :date1),
+                     'Platform Access,Training', 'Databricks',
+                     :date1, :date1),
                     ('Power BI Dashboard Consultation',
                      'Looking for help designing executive dashboard in Power BI',
                      'Finance', 'Michael Chang', 'michael.chang@company.com', true,
-                     'Consultation/Questions,Environment Enhancement',
-                     :date2)
+                     'Consultation/Questions,Environment Enhancement', 'Power Platform',
+                     :date2, :date2)
             """), {
-                'date1': (today - timedelta(hours=17)).isoformat(),
-                'date2': (today - timedelta(hours=18)).isoformat()
+                'date1': (today - timedelta(hours=17)),
+                'date2': (today - timedelta(hours=18))
             })
             conn.commit()
             print("✅ Sample intake requests inserted")
@@ -174,18 +175,18 @@ def seed_database():
             # Assign states to requests
             print("\n📝 Assigning states to requests...")
             conn.execute(text("""
-                INSERT INTO request_state_assignments (request_id, state_id, assigned_by)
-                SELECT ir.id, rs.id, 'System'
+                INSERT INTO request_state_assignments (request_id, state_id)
+                SELECT ir.id, rs.id
                 FROM intake_requests ir
                 CROSS JOIN request_states rs
                 WHERE ir.title = 'Need Databricks Access for Sales Analytics' AND rs.name = 'New'
                 
                 UNION ALL
                 
-                SELECT ir.id, rs.id, 'Admin User'
+                SELECT ir.id, rs.id
                 FROM intake_requests ir
                 CROSS JOIN request_states rs
-                WHERE ir.title = 'Power BI Dashboard Consultation' AND rs.name IN ('In Review', 'Assigned')
+                WHERE ir.title = 'Power BI Dashboard Consultation' AND rs.name = 'In Review'
             """))
             conn.commit()
             print("✅ States assigned to requests")

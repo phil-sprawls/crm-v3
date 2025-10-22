@@ -123,54 +123,48 @@ def migrate_database():
             conn.commit()
             print("✅ primary_it_partners table created")
             
-            # Create request_states table
+            # Create request_states table (MUST match models.py exactly)
             print("\n📋 Creating request_states table...")
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS request_states (
                     id SERIAL PRIMARY KEY,
                     name VARCHAR NOT NULL UNIQUE,
-                    description VARCHAR,
                     color VARCHAR,
-                    is_active BOOLEAN DEFAULT TRUE,
-                    display_order INTEGER DEFAULT 0,
+                    description VARCHAR,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """))
             conn.commit()
             print("✅ request_states table created")
             
-            # Create intake_requests table
+            # Create intake_requests table (MUST match models.py exactly)
             print("\n📋 Creating intake_requests table...")
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS intake_requests (
                     id SERIAL PRIMARY KEY,
                     title VARCHAR NOT NULL,
                     description TEXT,
-                    functional_area VARCHAR NOT NULL,
-                    submitter_name VARCHAR NOT NULL,
-                    submitter_email VARCHAR NOT NULL,
-                    has_it_partner BOOLEAN NOT NULL,
-                    it_partner_name VARCHAR,
-                    it_partner_email VARCHAR,
-                    selected_help_types TEXT NOT NULL,
-                    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    has_it_partner BOOLEAN DEFAULT FALSE,
+                    dri_contact VARCHAR,
+                    submitted_for VARCHAR,
+                    functional_area VARCHAR,
+                    help_types VARCHAR,
+                    platform VARCHAR,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """))
             conn.commit()
             print("✅ intake_requests table created")
             
-            # Create request_state_assignments table
+            # Create request_state_assignments table (MUST match models.py exactly)
             print("\n📋 Creating request_state_assignments table...")
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS request_state_assignments (
                     id SERIAL PRIMARY KEY,
                     request_id INTEGER NOT NULL REFERENCES intake_requests(id) ON DELETE CASCADE,
                     state_id INTEGER NOT NULL REFERENCES request_states(id) ON DELETE CASCADE,
-                    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    assigned_by VARCHAR,
-                    notes TEXT,
-                    UNIQUE(request_id, state_id)
+                    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """))
             conn.commit()
@@ -187,14 +181,14 @@ def migrate_database():
                 # Insert default request states
                 print("\n📝 Inserting default request states...")
                 conn.execute(text("""
-                    INSERT INTO request_states (name, description, color, display_order) VALUES
-                        ('New', 'Request has been submitted and is awaiting review', '#3b82f6', 1),
-                        ('In Review', 'Request is being reviewed by the team', '#8b5cf6', 2),
-                        ('Assigned', 'Request has been assigned to a team member', '#0ea5e9', 3),
-                        ('In Progress', 'Work on the request has started', '#f59e0b', 4),
-                        ('Blocked', 'Request is blocked and cannot proceed', '#ef4444', 5),
-                        ('Completed', 'Request has been successfully completed', '#10b981', 6),
-                        ('Rejected', 'Request has been rejected', '#6b7280', 7)
+                    INSERT INTO request_states (name, description, color) VALUES
+                        ('New', 'Request has been submitted and is awaiting review', '#3b82f6'),
+                        ('In Review', 'Request is being reviewed by the team', '#8b5cf6'),
+                        ('Assigned', 'Request has been assigned to a team member', '#0ea5e9'),
+                        ('In Progress', 'Work on the request has started', '#f59e0b'),
+                        ('Blocked', 'Request is blocked and cannot proceed', '#ef4444'),
+                        ('Completed', 'Request has been successfully completed', '#10b981'),
+                        ('Rejected', 'Request has been rejected', '#6b7280')
                 """))
                 conn.commit()
                 print("✅ Default states inserted")
