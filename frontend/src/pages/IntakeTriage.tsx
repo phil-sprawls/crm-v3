@@ -18,7 +18,7 @@ const API_BASE_URL = (() => {
     return 'https://crm-backend-dev.azurewebsites.net';
   }
   
-  return 'http://localhost:8000';
+  return 'http://localhost:7006';
 })();
 
 interface IntakeRequest {
