@@ -363,6 +363,27 @@ The application will automatically:
 
 **Use this if you have important data you want to preserve.**
 
+#### Method A: Using Python Script (Recommended - No psql needed!)
+
+```bash
+# Make sure you're in the backend directory and venv is activated
+cd backend
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Run the migration script
+python migrate_db.py
+```
+
+The script will:
+- ✅ Create the 3 new tables
+- ✅ Insert 7 default request states
+- ✅ Skip if tables already exist
+- ✅ Keep all your existing data
+
+Then start the backend server normally.
+
+#### Method B: Using psql (If you have PostgreSQL client installed)
+
 ```bash
 # Connect to your database
 psql postgresql://postgres:yourpassword@localhost:5432/crm_db
