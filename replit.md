@@ -286,16 +286,18 @@ See **LOCAL_SETUP.md** for complete instructions on:
 - **Database migration for existing users** - If you previously ran this app locally, you'll need to update your database schema to include the new intake request tables
 - Troubleshooting common issues
 
-## Azure Deployment
+## Azure Development Environment Setup
 
-See **AZURE_DEPLOYMENT.md** for complete instructions on:
+See **AZURE_DEV_SETUP.md** for complete instructions on:
+- Creating environment configuration files (.env)
 - Setting up Azure PostgreSQL Flexible Server
-- Deploying backend (FastAPI) to Azure App Service
+- Seeding Azure database with sample data using Python script
+- Deploying backend (FastAPI) to Azure App Service (existing or new)
+- Configuring Azure AD authentication with JWT tokens (optional)
 - Deploying frontend (React) to Azure App Service
-- Configuring Azure AD authentication with JWT tokens
-- Setting up CI/CD with GitHub Actions
+- Environment variables summary (required and optional)
 - Monitoring and troubleshooting
-- Cost estimation and resource management
+- Cost estimation (~$28/month for dev environment)
 
 ## User Preferences
 - Clean, modern UI design with Tailwind CSS
