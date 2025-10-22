@@ -98,10 +98,10 @@ def migrate_database():
             conn.commit()
             print("✅ updates table created")
             
-            # Create platforms table
-            print("\n📋 Creating platforms table...")
+            # Create platforms_crm table
+            print("\n📋 Creating platforms_crm table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS platforms (
+                CREATE TABLE IF NOT EXISTS platforms_crm (
                     id SERIAL PRIMARY KEY,
                     account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
                     platform_name VARCHAR,
@@ -109,7 +109,7 @@ def migrate_database():
                 )
             """))
             conn.commit()
-            print("✅ platforms table created")
+            print("✅ platforms_crm table created")
             
             # Create primary_it_partners table
             print("\n📋 Creating primary_it_partners table...")
@@ -198,7 +198,7 @@ def migrate_database():
             print("  - accounts")
             print("  - use_cases")
             print("  - updates")
-            print("  - platforms")
+            print("  - platforms_crm")
             print("  - primary_it_partners")
             print("  - request_states")
             print("  - intake_requests")

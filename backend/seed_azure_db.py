@@ -116,17 +116,17 @@ def seed_database():
             print("✅ Sample updates processed")
             
             # Check and insert platforms
-            print("\n🔍 Checking platforms table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM platforms"))
+            print("\n🔍 Checking platforms_crm table...")
+            result = conn.execute(text("SELECT COUNT(*) FROM platforms_crm"))
             platform_count = result.scalar()
             
             if platform_count and platform_count > 0:
                 print(f"ℹ️  Found {platform_count} existing platform records, adding sample platforms...")
             else:
-                print("📝 Platforms table is empty, inserting sample platforms...")
+                print("📝 Platforms_crm table is empty, inserting sample platforms...")
             
             conn.execute(text("""
-                INSERT INTO platforms (account_uid, platform_name, onboarding_status)
+                INSERT INTO platforms_crm (account_uid, platform_name, onboarding_status)
                 SELECT * FROM (VALUES
                     ('ACC001', 'Databricks', 'Onboarded'),
                     ('ACC001', 'Snowflake', 'Onboarded'),
@@ -137,7 +137,7 @@ def seed_database():
                 ) AS v(account_uid, platform_name, onboarding_status)
                 WHERE EXISTS (SELECT 1 FROM accounts WHERE uid = v.account_uid)
                 AND NOT EXISTS (
-                    SELECT 1 FROM platforms p 
+                    SELECT 1 FROM platforms_crm p 
                     WHERE p.account_uid = v.account_uid 
                     AND p.platform_name = v.platform_name
                 )
@@ -277,7 +277,7 @@ def seed_database():
             print(f"  - Use Cases: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM updates"))
             print(f"  - Updates: {result.scalar()}")
-            result = conn.execute(text("SELECT COUNT(*) FROM platforms"))
+            result = conn.execute(text("SELECT COUNT(*) FROM platforms_crm"))
             print(f"  - Platform records: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM primary_it_partners"))
             print(f"  - IT Partners: {result.scalar()}")

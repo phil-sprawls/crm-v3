@@ -63,7 +63,7 @@ workspace/
 3. **Updates** - Activity updates for accounts
    - Description, Author, Platform, Date
 
-4. **Platforms** - Platform onboarding status
+4. **Platforms_CRM** - Platform onboarding status (renamed to avoid conflicts)
    - Platform Name (Databricks, Snowflake, Power Platform, Fabric)
    - Onboarding Status
 

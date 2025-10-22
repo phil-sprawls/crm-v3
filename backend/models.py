@@ -58,7 +58,7 @@ class Update(SQLModel, table=True):
 
 
 class Platform(SQLModel, table=True):
-    __tablename__ = "platforms"
+    __tablename__ = "platforms_crm"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     account_uid: str = Field(foreign_key="accounts.uid")

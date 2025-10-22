@@ -483,7 +483,7 @@ psql postgresql://postgres:yourpassword@localhost:5432/dev_psprawls
 # - accounts
 # - use_cases
 # - updates
-# - platforms
+# - platforms_crm
 # - primary_it_partner
 # - intake_requests (NEW)
 # - request_states (NEW)

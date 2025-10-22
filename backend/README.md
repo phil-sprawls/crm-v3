@@ -27,7 +27,7 @@ python migrate_db.py
   - `accounts` - Main account/team information
   - `use_cases` - Use cases for each account
   - `updates` - Activity updates
-  - `platforms` - Platform onboarding status
+  - `platforms_crm` - Platform onboarding status
   - `primary_it_partners` - IT partner assignments
   - `request_states` - Workflow states for intake requests
   - `intake_requests` - User-submitted assistance requests

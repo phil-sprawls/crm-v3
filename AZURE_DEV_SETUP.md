@@ -200,8 +200,8 @@ Database Migration - Create All Tables
 ✅ use_cases table created
 📋 Creating updates table...
 ✅ updates table created
-📋 Creating platforms table...
-✅ platforms table created
+📋 Creating platforms_crm table...
+✅ platforms_crm table created
 📋 Creating primary_it_partners table...
 ✅ primary_it_partners table created
 📋 Creating request_states table...
@@ -219,7 +219,7 @@ All tables created:
   - accounts
   - use_cases
   - updates
-  - platforms
+  - platforms_crm
   - primary_it_partners
   - request_states
   - intake_requests
