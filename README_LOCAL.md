@@ -44,8 +44,8 @@ source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # Setup database (creates all tables with correct schema)
-python migrate_db.py --drop
-python seed_azure_db.py
+python migrate_db.py            # Drops and recreates all tables
+python seed_azure_db.py         # Adds sample data
 ```
 
 ### Step 3: Run

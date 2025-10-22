@@ -16,7 +16,7 @@ source venv/bin/activate       # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # 2. Database
-python migrate_db.py --drop    # Create tables
+python migrate_db.py           # Create all tables (drops existing!)
 python seed_azure_db.py        # Add sample data
 
 # 3. Run
@@ -32,32 +32,31 @@ Creates all database tables for the CRM application.
 
 **Usage:**
 ```bash
-# Safe mode - preserves existing data
 python migrate_db.py
-
-# Drop and recreate all tables (DESTRUCTIVE - deletes all data)
-python migrate_db.py --drop
 ```
 
 **What it does:**
+- **ALWAYS drops and recreates all tables from scratch**
 - Creates all 8 database tables with exact schema from models.py:
-  - `accounts` - Main account/team information
-  - `use_cases` - Use cases for each account
-  - `updates` - Activity updates
-  - `platforms_crm` - Platform onboarding status
-  - `primary_it_partners` - IT partner assignments
-  - `request_states` - Workflow states for intake requests
-  - `intake_requests` - User-submitted assistance requests
-  - `request_state_assignments` - Request-to-state relationships
+  - `accounts` - Main account/team information (24 columns)
+  - `use_cases` - Use cases for each account (9 columns)
+  - `updates` - Activity updates (6 columns)
+  - `platforms_crm` - Platform onboarding status (4 columns)
+  - `primary_it_partners` - IT partner assignments (3 columns)
+  - `request_states` - Workflow states for intake requests (5 columns)
+  - `intake_requests` - User-submitted assistance requests (11 columns)
+  - `request_state_assignments` - Request-to-state relationships (4 columns)
 - Inserts 7 default request states
-- Safe mode: uses CREATE TABLE IF NOT EXISTS (preserves data)
-- Drop mode: drops all tables and recreates from scratch
+- Ensures all columns match models.py exactly
+- Prevents column mismatch errors
 
 **When to use:**
-- **Safe mode**: Setting up new database, adding missing tables
-- **Drop mode**: Fixing column mismatches, starting fresh, recovering from corruption
+- Setting up new database
+- Fixing column mismatches
+- After updating models.py
+- Any time you need a fresh database schema
 
-**⚠️ Warning:** `--drop` flag will delete ALL data! Use with caution.
+**⚠️ Warning:** This script DELETES ALL DATA every time it runs!
 
 ### seed_azure_db.py
 Seeds Azure PostgreSQL database with sample data.

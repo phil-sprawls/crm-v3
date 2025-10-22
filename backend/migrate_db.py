@@ -2,12 +2,11 @@
 """
 Database migration script for IT Platform CRM
 
-Creates all database tables matching the schema in models.py.
-Safe to run multiple times.
+ALWAYS drops and recreates all tables from scratch to ensure correct schema.
+This guarantees all columns match models.py exactly.
 
 Usage:
-    python migrate_db.py              # Create tables (safe, preserves data)
-    python migrate_db.py --drop       # Drop and recreate all tables (DESTRUCTIVE)
+    python migrate_db.py
 """
 
 import os
@@ -18,61 +17,48 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-def migrate_database(drop_tables=False):
-    """Run database migration to create all tables"""
+def migrate_database():
+    """Drop and recreate all database tables from scratch"""
     
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         print("❌ Error: DATABASE_URL environment variable not set")
         print("\nPlease set DATABASE_URL in your .env file or environment")
+        print("Example: DATABASE_URL=postgresql://user:pass@host:5432/dbname")
         return False
     
-    print("🚀 Starting database migration...")
+    print("=" * 60)
+    print("Database Migration - IT Platform CRM")
+    print("=" * 60)
+    print("\n🚀 Starting database migration...")
     print(f"📍 Connecting to: {database_url.split('@')[1] if '@' in database_url else 'database'}")
-    
-    if drop_tables:
-        print("\n⚠️  WARNING: --drop flag detected!")
-        print("⚠️  This will DELETE ALL DATA in the following tables:")
-        print("    - request_state_assignments")
-        print("    - intake_requests")
-        print("    - request_states")
-        print("    - primary_it_partners")
-        print("    - platforms_crm")
-        print("    - updates")
-        print("    - use_cases")
-        print("    - accounts")
-        response = input("\n❓ Type 'YES' to confirm deletion: ")
-        if response != "YES":
-            print("❌ Migration cancelled")
-            return False
+    print("\n⚠️  This will DROP and RECREATE all tables!")
     
     try:
         engine = create_engine(database_url)
         
         with engine.connect() as conn:
-            if drop_tables:
-                print("\n🗑️  Dropping existing tables...")
-                # Drop in reverse dependency order
-                tables_to_drop = [
-                    "request_state_assignments",
-                    "intake_requests", 
-                    "request_states",
-                    "primary_it_partners",
-                    "platforms_crm",
-                    "updates",
-                    "use_cases",
-                    "accounts"
-                ]
-                for table in tables_to_drop:
-                    print(f"   Dropping {table}...")
-                    conn.execute(text(f"DROP TABLE IF EXISTS {table} CASCADE"))
-                conn.commit()
-                print("✅ All tables dropped")
+            # Drop all tables in reverse dependency order
+            print("\n🗑️  Dropping existing tables...")
+            tables_to_drop = [
+                "request_state_assignments",
+                "intake_requests", 
+                "request_states",
+                "primary_it_partners",
+                "platforms_crm",
+                "updates",
+                "use_cases",
+                "accounts"
+            ]
+            for table in tables_to_drop:
+                conn.execute(text(f"DROP TABLE IF EXISTS {table} CASCADE"))
+            conn.commit()
+            print("✅ All tables dropped")
             
-            # Create accounts table (parent table, no dependencies)
+            # Create accounts table with ALL columns from models.py
             print("\n📋 Creating accounts table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS accounts (
+                CREATE TABLE accounts (
                     uid VARCHAR PRIMARY KEY,
                     team VARCHAR,
                     business_it_area VARCHAR,
@@ -102,10 +88,10 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ accounts table created")
             
-            # Create use_cases table
+            # Create use_cases table with ALL columns from models.py
             print("\n📋 Creating use_cases table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS use_cases (
+                CREATE TABLE use_cases (
                     id SERIAL PRIMARY KEY,
                     account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
                     problem TEXT,
@@ -120,10 +106,10 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ use_cases table created")
             
-            # Create updates table
+            # Create updates table with ALL columns from models.py
             print("\n📋 Creating updates table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS updates (
+                CREATE TABLE updates (
                     id SERIAL PRIMARY KEY,
                     account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
                     description TEXT,
@@ -135,10 +121,10 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ updates table created")
             
-            # Create platforms_crm table
+            # Create platforms_crm table with ALL columns from models.py
             print("\n📋 Creating platforms_crm table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS platforms_crm (
+                CREATE TABLE platforms_crm (
                     id SERIAL PRIMARY KEY,
                     account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
                     platform_name VARCHAR,
@@ -148,10 +134,10 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ platforms_crm table created")
             
-            # Create primary_it_partners table
+            # Create primary_it_partners table with ALL columns from models.py
             print("\n📋 Creating primary_it_partners table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS primary_it_partners (
+                CREATE TABLE primary_it_partners (
                     id SERIAL PRIMARY KEY,
                     account_uid VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE,
                     primary_it_partner VARCHAR
@@ -160,10 +146,10 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ primary_it_partners table created")
             
-            # Create request_states table
+            # Create request_states table with ALL columns from models.py
             print("\n📋 Creating request_states table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS request_states (
+                CREATE TABLE request_states (
                     id SERIAL PRIMARY KEY,
                     name VARCHAR NOT NULL UNIQUE,
                     color VARCHAR,
@@ -177,7 +163,7 @@ def migrate_database(drop_tables=False):
             # Create intake_requests table with ALL columns from models.py
             print("\n📋 Creating intake_requests table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS intake_requests (
+                CREATE TABLE intake_requests (
                     id SERIAL PRIMARY KEY,
                     title VARCHAR NOT NULL,
                     description TEXT,
@@ -194,10 +180,10 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ intake_requests table created")
             
-            # Create request_state_assignments table
+            # Create request_state_assignments table with ALL columns from models.py
             print("\n📋 Creating request_state_assignments table...")
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS request_state_assignments (
+                CREATE TABLE request_state_assignments (
                     id SERIAL PRIMARY KEY,
                     request_id INTEGER NOT NULL REFERENCES intake_requests(id) ON DELETE CASCADE,
                     state_id INTEGER NOT NULL REFERENCES request_states(id) ON DELETE CASCADE,
@@ -207,52 +193,44 @@ def migrate_database(drop_tables=False):
             conn.commit()
             print("✅ request_state_assignments table created")
             
-            # Check if default states already exist
-            print("\n🔍 Checking for existing request states...")
-            result = conn.execute(text("SELECT COUNT(*) FROM request_states"))
-            count = result.scalar()
+            # Insert default request states
+            print("\n📝 Inserting default request states...")
+            conn.execute(text("""
+                INSERT INTO request_states (name, description, color) VALUES
+                    ('New', 'Request has been submitted and is awaiting review', '#3b82f6'),
+                    ('In Review', 'Request is being reviewed by the team', '#8b5cf6'),
+                    ('Assigned', 'Request has been assigned to a team member', '#0ea5e9'),
+                    ('In Progress', 'Work on the request has started', '#f59e0b'),
+                    ('Blocked', 'Request is blocked and cannot proceed', '#ef4444'),
+                    ('Completed', 'Request has been successfully completed', '#10b981'),
+                    ('Rejected', 'Request has been rejected', '#6b7280')
+            """))
+            conn.commit()
+            print("✅ Default request states inserted")
             
-            if count and count > 0:
-                print(f"ℹ️  Found {count} existing states, skipping default state insertion")
-            else:
-                # Insert default request states
-                print("\n📝 Inserting default request states...")
-                conn.execute(text("""
-                    INSERT INTO request_states (name, description, color) VALUES
-                        ('New', 'Request has been submitted and is awaiting review', '#3b82f6'),
-                        ('In Review', 'Request is being reviewed by the team', '#8b5cf6'),
-                        ('Assigned', 'Request has been assigned to a team member', '#0ea5e9'),
-                        ('In Progress', 'Work on the request has started', '#f59e0b'),
-                        ('Blocked', 'Request is blocked and cannot proceed', '#ef4444'),
-                        ('Completed', 'Request has been successfully completed', '#10b981'),
-                        ('Rejected', 'Request has been rejected', '#6b7280')
-                """))
-                conn.commit()
-                print("✅ Default states inserted")
-            
-            print("\n🎉 Migration completed successfully!")
-            print("\nAll tables created:")
-            print("  - accounts")
-            print("  - use_cases")
-            print("  - updates")
-            print("  - platforms_crm")
-            print("  - primary_it_partners")
-            print("  - request_states")
-            print("  - intake_requests")
-            print("  - request_state_assignments")
+            print("\n" + "=" * 60)
+            print("🎉 Migration completed successfully!")
+            print("=" * 60)
+            print("\nAll tables created with correct schema:")
+            print("  ✓ accounts")
+            print("  ✓ use_cases")
+            print("  ✓ updates")
+            print("  ✓ platforms_crm")
+            print("  ✓ primary_it_partners")
+            print("  ✓ request_states (with 7 default states)")
+            print("  ✓ intake_requests")
+            print("  ✓ request_state_assignments")
+            print("\n📊 Next step: Run 'python seed_azure_db.py' to add sample data")
+            print("=" * 60)
             
             return True
             
     except Exception as e:
         print(f"\n❌ Migration failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("Database Migration - IT Platform CRM")
-    print("=" * 60)
-    
-    drop_tables = "--drop" in sys.argv or "--drop-tables" in sys.argv
-    
-    success = migrate_database(drop_tables=drop_tables)
+    success = migrate_database()
     sys.exit(0 if success else 1)

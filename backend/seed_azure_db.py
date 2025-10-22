@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 """
 Azure Database Seeding Script
-Seeds an Azure PostgreSQL database with sample data for the CRM application.
-Handles partially seeded databases intelligently.
+
+Seeds Azure PostgreSQL database with sample data for the CRM application.
+All columns match exactly with migrate_db.py schema.
 
 Usage:
     python seed_azure_db.py
@@ -20,196 +22,132 @@ load_dotenv()
 def seed_database():
     """Seed Azure PostgreSQL database with sample data"""
     
-    # Get database URL
     database_url = os.getenv('DATABASE_URL')
     if not database_url:
         print("❌ ERROR: DATABASE_URL not found in environment variables")
         print("Please set DATABASE_URL in your .env file")
         return False
     
-    print(f"🔌 Connecting to Azure PostgreSQL database...")
-    engine = create_engine(database_url)
+    print("=" * 60)
+    print("Azure Database Seeding Script")
+    print("=" * 60)
+    print(f"\n🔌 Connecting to database...")
+    print(f"📍 {database_url.split('@')[1] if '@' in database_url else 'database'}")
     
     try:
+        engine = create_engine(database_url)
+        
         with engine.connect() as conn:
-            print("✅ Connected successfully")
+            print("✅ Connected successfully\n")
             
-            # Check and insert accounts
-            print("\n🔍 Checking accounts table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM accounts"))
-            account_count = result.scalar()
-            
-            if account_count and account_count > 0:
-                print(f"ℹ️  Found {account_count} existing accounts, adding sample accounts if not present...")
-            else:
-                print("📝 Accounts table is empty, inserting sample accounts...")
-            
+            # Insert accounts with ALL columns matching migration script
+            print("📝 Inserting sample accounts...")
             conn.execute(text("""
-                INSERT INTO accounts (uid, team, business_it_area, vp, team_admin, 
-                                     use_case, use_case_status, databricks, snowflake,
-                                     csm, health, health_reason)
+                INSERT INTO accounts (
+                    uid, team, business_it_area, vp, team_admin,
+                    use_case, use_case_status, databricks, month_onboarded_db,
+                    snowflake, month_onboarded_sf, north_star_domain, business_or_it,
+                    centerwell_or_insurance, git_repo, unique_identifier, associated_ado_items,
+                    team_artifacts, current_tech_stack, ad_groups, notes, csm, health, health_reason
+                )
                 VALUES 
-                    ('ACC001', 'Data Analytics Team', 'Business Intelligence', 'Sarah Johnson', 
-                     'Mike Chen', 'Customer Behavior Analysis', 'Active', 'Onboarded', 'Onboarded',
-                     'Mike Chen', 'Green', 'All systems operational'),
-                    ('ACC002', 'Marketing Automation', 'Marketing Technology', 'Robert Davis',
-                     'Lisa Anderson', 'Campaign Performance Tracking', 'In Progress', 'Onboarded', 'Not Started',
-                     'Lisa Anderson', 'Yellow', 'Awaiting Snowflake onboarding'),
-                    ('ACC003', 'Finance Reporting', 'Financial Analytics', 'Emily Taylor',
-                     'James Wilson', 'Real-time Financial Dashboards', 'Active', 'Onboarded', 'Onboarded',
-                     'James Wilson', 'Green', 'All systems operational')
-                ON CONFLICT (uid) DO NOTHING
+                    ('ACC001', 'Data Analytics Team', 'Business Intelligence', 'Sarah Johnson', 'Mike Chen',
+                     'Customer Behavior Analysis', 'Active', 'y', '2024-03-15',
+                     'y', '2024-02-10', 'Customer Insights', 'Business',
+                     'Insurance', 'https://github.com/company/analytics-dashboard', 'DA-2024-001', 
+                     'https://dev.azure.com/items/12345', 'https://confluence.company.com/analytics',
+                     'Python, Databricks, Snowflake, Power BI', 'DA-Analytics-Users, DA-Analytics-Admins',
+                     'Team is progressing well with Databricks migration', 'Mike Chen', 'Green', 
+                     'All systems operational'),
+                    
+                    ('ACC002', 'Marketing Automation', 'Marketing Technology', 'Robert Davis', 'Lisa Anderson',
+                     'Campaign Performance Tracking', 'In Progress', 'y', '2024-01-20',
+                     'n', NULL, 'Marketing ROI', 'Business',
+                     'Centerwell', 'https://github.com/company/marketing-analytics', 'MA-2024-002',
+                     'https://dev.azure.com/items/12346', 'https://confluence.company.com/marketing',
+                     'Snowflake, Power Platform, SQL Server', 'MA-Users, MA-Admins',
+                     'Successfully migrated to Power Platform', 'Lisa Anderson', 'Yellow',
+                     'Awaiting Snowflake onboarding'),
+                    
+                    ('ACC003', 'Finance Reporting', 'Financial Analytics', 'Emily Taylor', 'James Wilson',
+                     'Financial Forecasting Model', 'Planning', 'y', '2024-04-01',
+                     'y', '2024-03-25', 'Financial Planning', 'IT',
+                     'Insurance', 'https://github.com/company/finance-forecasting', 'FR-2024-003',
+                     'https://dev.azure.com/items/12347', 'https://confluence.company.com/finance',
+                     'Databricks, Snowflake, Fabric, Excel', 'FR-Users, FR-Power-Users',
+                     'Evaluating Fabric integration options', 'James Wilson', 'Green',
+                     'On track with all deliverables')
             """))
             conn.commit()
-            print("✅ Sample accounts processed")
+            print("✅ Sample accounts inserted (3 accounts)\n")
             
-            # Check and insert use cases
-            print("\n🔍 Checking use_cases table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM use_cases"))
-            usecase_count = result.scalar()
-            
-            if usecase_count and usecase_count > 0:
-                print(f"ℹ️  Found {usecase_count} existing use cases, adding sample use cases...")
-            else:
-                print("📝 Use cases table is empty, inserting sample use cases...")
-            
+            # Insert use cases
+            print("📝 Inserting sample use cases...")
             conn.execute(text("""
                 INSERT INTO use_cases (account_uid, problem, solution, value, leader, status, enablement_tier, platform)
-                SELECT * FROM (VALUES
-                    ('ACC001', 'Manual data analysis taking too long', 'Automated Databricks pipeline', 
-                     'Reduced analysis time by 80%', 'Mike Chen', 'Completed', 'Tier 1', 'Databricks'),
-                    ('ACC002', 'Difficulty tracking campaign ROI', 'Real-time marketing dashboard',
-                     'Improved campaign performance by 25%', 'Lisa Anderson', 'In Progress', 'Tier 2', 'Databricks'),
-                    ('ACC003', 'Quarterly reports manually compiled', 'Automated financial reporting',
-                     'Reduced reporting time from 5 days to 2 hours', 'James Wilson', 'Completed', 'Tier 1', 'Snowflake')
-                ) AS v(account_uid, problem, solution, value, leader, status, enablement_tier, platform)
-                WHERE EXISTS (SELECT 1 FROM accounts WHERE uid = v.account_uid)
+                VALUES 
+                    ('ACC001', 'Lack of real-time customer insights', 
+                     'Build unified analytics platform with Databricks',
+                     '$2M annual savings, 50% faster insights', 'Mike Chen', 'In Progress', 'Tier 2', 'Databricks'),
+                    ('ACC002', 'Manual campaign reporting process',
+                     'Automated reporting with Power Platform',
+                     '80% reduction in reporting time', 'Lisa Anderson', 'Completed', 'Tier 1', 'Power Platform'),
+                    ('ACC003', 'Inaccurate financial forecasts',
+                     'ML-powered forecasting on Databricks',
+                     '30% improvement in forecast accuracy', 'James Wilson', 'Planning', 'Tier 3', 'Databricks')
             """))
             conn.commit()
-            print("✅ Sample use cases processed")
+            print("✅ Sample use cases inserted (3 use cases)\n")
             
-            # Check and insert updates
-            print("\n🔍 Checking updates table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM updates"))
-            update_count = result.scalar()
-            
-            if update_count and update_count > 0:
-                print(f"ℹ️  Found {update_count} existing updates, adding sample updates...")
-            else:
-                print("📝 Updates table is empty, inserting sample updates...")
-            
-            today = datetime.now()
+            # Insert updates
+            print("📝 Inserting sample updates...")
             conn.execute(text("""
                 INSERT INTO updates (account_uid, description, author, platform, date)
-                SELECT * FROM (VALUES
-                    ('ACC001', 'Completed initial data pipeline setup', 'Mike Chen', 'Databricks', :date1),
-                    ('ACC002', 'Marketing dashboard in UAT phase', 'Lisa Anderson', 'Databricks', :date2),
-                    ('ACC003', 'Financial reports automated and running daily', 'James Wilson', 'Snowflake', :date3)
-                ) AS v(account_uid, description, author, platform, date)
-                WHERE EXISTS (SELECT 1 FROM accounts WHERE uid = v.account_uid)
-            """), {
-                'date1': (today - timedelta(days=7)).date(),
-                'date2': (today - timedelta(days=3)).date(),
-                'date3': (today - timedelta(days=1)).date()
-            })
+                VALUES 
+                    ('ACC001', 'Completed Phase 1 of Databricks migration', 'Mike Chen', 'Databricks', '2024-03-20'),
+                    ('ACC002', 'Campaign dashboard deployed to production', 'Lisa Anderson', 'Power Platform', '2024-02-15'),
+                    ('ACC003', 'Databricks workspace setup completed', 'James Wilson', 'Databricks', '2024-04-05')
+            """))
             conn.commit()
-            print("✅ Sample updates processed")
+            print("✅ Sample updates inserted (3 updates)\n")
             
-            # Check and insert platforms
-            print("\n🔍 Checking platforms_crm table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM platforms_crm"))
-            platform_count = result.scalar()
-            
-            if platform_count and platform_count > 0:
-                print(f"ℹ️  Found {platform_count} existing platform records, adding sample platforms...")
-            else:
-                print("📝 Platforms_crm table is empty, inserting sample platforms...")
-            
+            # Insert platforms
+            print("📝 Inserting sample platforms...")
             conn.execute(text("""
                 INSERT INTO platforms_crm (account_uid, platform_name, onboarding_status)
-                SELECT * FROM (VALUES
+                VALUES 
                     ('ACC001', 'Databricks', 'Onboarded'),
                     ('ACC001', 'Snowflake', 'Onboarded'),
                     ('ACC002', 'Databricks', 'Onboarded'),
                     ('ACC002', 'Power Platform', 'In Progress'),
                     ('ACC003', 'Databricks', 'Onboarded'),
                     ('ACC003', 'Snowflake', 'Onboarded')
-                ) AS v(account_uid, platform_name, onboarding_status)
-                WHERE EXISTS (SELECT 1 FROM accounts WHERE uid = v.account_uid)
-                AND NOT EXISTS (
-                    SELECT 1 FROM platforms_crm p 
-                    WHERE p.account_uid = v.account_uid 
-                    AND p.platform_name = v.platform_name
-                )
             """))
             conn.commit()
-            print("✅ Sample platforms processed")
+            print("✅ Sample platforms inserted (6 platform records)\n")
             
-            # Check and insert IT partners
-            print("\n🔍 Checking primary_it_partners table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM primary_it_partners"))
-            partner_count = result.scalar()
-            
-            if partner_count and partner_count > 0:
-                print(f"ℹ️  Found {partner_count} existing IT partners, adding sample IT partners...")
-            else:
-                print("📝 IT partners table is empty, inserting sample IT partners...")
-            
+            # Insert IT partners
+            print("📝 Inserting sample IT partners...")
             conn.execute(text("""
                 INSERT INTO primary_it_partners (account_uid, primary_it_partner)
-                SELECT * FROM (VALUES
+                VALUES 
                     ('ACC001', 'John Smith'),
-                    ('ACC002', 'Sarah Williams'),
-                    ('ACC003', 'David Brown')
-                ) AS v(account_uid, primary_it_partner)
-                WHERE EXISTS (SELECT 1 FROM accounts WHERE uid = v.account_uid)
-                AND NOT EXISTS (
-                    SELECT 1 FROM primary_it_partners p 
-                    WHERE p.account_uid = v.account_uid
-                )
+                    ('ACC002', 'Alice Cooper'),
+                    ('ACC003', 'Bob Martinez')
             """))
             conn.commit()
-            print("✅ Sample IT partners processed")
+            print("✅ Sample IT partners inserted (3 IT partners)\n")
             
-            # Check and insert request states
-            print("\n🔍 Checking request_states table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM request_states"))
-            state_count = result.scalar()
-            
-            if not state_count or state_count == 0:
-                print("📝 Request states table is empty, inserting default states...")
-                conn.execute(text("""
-                    INSERT INTO request_states (name, description, color) VALUES
-                        ('New', 'Request has been submitted and is awaiting review', '#3b82f6'),
-                        ('In Review', 'Request is being reviewed by the team', '#8b5cf6'),
-                        ('Assigned', 'Request has been assigned to a team member', '#0ea5e9'),
-                        ('In Progress', 'Work on the request has started', '#f59e0b'),
-                        ('Blocked', 'Request is blocked and cannot proceed', '#ef4444'),
-                        ('Completed', 'Request has been successfully completed', '#10b981'),
-                        ('Rejected', 'Request has been rejected', '#6b7280')
-                    ON CONFLICT (name) DO NOTHING
-                """))
-                conn.commit()
-                print("✅ Default request states inserted")
-            else:
-                print(f"ℹ️  Found {state_count} existing states, skipping state insertion")
-            
-            # Check and insert intake requests
-            print("\n🔍 Checking intake_requests table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM intake_requests"))
-            request_count = result.scalar()
-            
-            if request_count and request_count > 0:
-                print(f"ℹ️  Found {request_count} existing intake requests, adding sample requests...")
-            else:
-                print("📝 Intake requests table is empty, inserting sample requests...")
-            
+            # Insert intake requests with ALL columns
+            print("📝 Inserting sample intake requests...")
             today = datetime.now()
             conn.execute(text("""
-                INSERT INTO intake_requests (title, description, functional_area, dri_contact, 
-                                            submitted_for, has_it_partner, help_types, platform,
-                                            created_at, updated_at)
-                SELECT * FROM (VALUES
+                INSERT INTO intake_requests (
+                    title, description, functional_area, dri_contact, 
+                    submitted_for, has_it_partner, help_types, platform,
+                    created_at, updated_at
+                )
+                VALUES 
                     ('Need Databricks Access for Sales Analytics', 
                      'Our sales team needs access to Databricks for building sales forecasting models',
                      'Sales', 'Jennifer Lee', 'jennifer.lee@company.com', false, 
@@ -220,28 +158,15 @@ def seed_database():
                      'Finance', 'Michael Chang', 'michael.chang@company.com', true,
                      'Consultation/Questions,Environment Enhancement', 'Power Platform',
                      :date2, :date2)
-                ) AS v(title, description, functional_area, dri_contact, submitted_for, 
-                       has_it_partner, help_types, platform, created_at, updated_at)
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM intake_requests ir WHERE ir.title = v.title
-                )
             """), {
                 'date1': (today - timedelta(hours=17)),
                 'date2': (today - timedelta(hours=18))
             })
             conn.commit()
-            print("✅ Sample intake requests processed")
+            print("✅ Sample intake requests inserted (2 requests)\n")
             
-            # Check and assign states to requests
-            print("\n🔍 Checking request_state_assignments table...")
-            result = conn.execute(text("SELECT COUNT(*) FROM request_state_assignments"))
-            assignment_count = result.scalar()
-            
-            if assignment_count and assignment_count > 0:
-                print(f"ℹ️  Found {assignment_count} existing state assignments, adding sample assignments...")
-            else:
-                print("📝 State assignments table is empty, assigning states to sample requests...")
-            
+            # Assign states to requests
+            print("📝 Assigning states to intake requests...")
             conn.execute(text("""
                 INSERT INTO request_state_assignments (request_id, state_id)
                 SELECT ir.id, rs.id
@@ -249,10 +174,6 @@ def seed_database():
                 CROSS JOIN request_states rs
                 WHERE ir.title = 'Need Databricks Access for Sales Analytics' 
                 AND rs.name = 'New'
-                AND NOT EXISTS (
-                    SELECT 1 FROM request_state_assignments rsa 
-                    WHERE rsa.request_id = ir.id AND rsa.state_id = rs.id
-                )
                 
                 UNION ALL
                 
@@ -261,55 +182,50 @@ def seed_database():
                 CROSS JOIN request_states rs
                 WHERE ir.title = 'Power BI Dashboard Consultation' 
                 AND rs.name = 'In Review'
-                AND NOT EXISTS (
-                    SELECT 1 FROM request_state_assignments rsa 
-                    WHERE rsa.request_id = ir.id AND rsa.state_id = rs.id
-                )
             """))
             conn.commit()
-            print("✅ State assignments processed")
+            print("✅ State assignments created (2 assignments)\n")
             
             # Get final counts
-            print("\n📊 Final database summary:")
+            print("=" * 60)
+            print("📊 Final Database Summary")
+            print("=" * 60)
             result = conn.execute(text("SELECT COUNT(*) FROM accounts"))
-            print(f"  - Accounts: {result.scalar()}")
+            print(f"  ✓ Accounts: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM use_cases"))
-            print(f"  - Use Cases: {result.scalar()}")
+            print(f"  ✓ Use Cases: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM updates"))
-            print(f"  - Updates: {result.scalar()}")
+            print(f"  ✓ Updates: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM platforms_crm"))
-            print(f"  - Platform records: {result.scalar()}")
+            print(f"  ✓ Platform records: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM primary_it_partners"))
-            print(f"  - IT Partners: {result.scalar()}")
+            print(f"  ✓ IT Partners: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM request_states"))
-            print(f"  - Request States: {result.scalar()}")
+            print(f"  ✓ Request States: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM intake_requests"))
-            print(f"  - Intake Requests: {result.scalar()}")
+            print(f"  ✓ Intake Requests: {result.scalar()}")
             result = conn.execute(text("SELECT COUNT(*) FROM request_state_assignments"))
-            print(f"  - State Assignments: {result.scalar()}")
+            print(f"  ✓ State Assignments: {result.scalar()}")
             
-            print("\n🎉 Database seeding completed successfully!")
+            print("\n" + "=" * 60)
+            print("🎉 Database seeding completed successfully!")
+            print("=" * 60)
+            print("\n✅ All done! Your database is ready with sample data.")
+            print("\nNext steps:")
+            print("  1. Start the backend: uvicorn main:app --host 0.0.0.0 --port 8000 --reload")
+            print("  2. Start the frontend: npm run dev")
+            print("  3. Access the app: http://localhost:5000")
+            print("=" * 60 + "\n")
+            
             return True
             
     except Exception as e:
-        print(f"\n❌ ERROR: Seeding failed")
-        print(f"Error details: {str(e)}")
+        print(f"\n❌ Seeding failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
-    finally:
-        engine.dispose()
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("Azure Database Seeding Script")
-    print("=" * 60)
-    
     success = seed_database()
-    
-    if success:
-        print("\n✅ All done! Your Azure database is ready with sample data.")
-        print("\nNext steps:")
-        print("  1. Deploy your backend to Azure App Service")
-        print("  2. Test the application with the sample data")
-    else:
-        print("\n❌ Seeding failed. Please check the error above.")
-        exit(1)
+    import sys
+    sys.exit(0 if success else 1)

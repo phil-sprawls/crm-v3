@@ -43,14 +43,14 @@ pip install -r requirements.txt
 ## Step 3: Setup Database (1 minute)
 
 ```bash
-# Option A: Fresh start (recommended first time)
-python migrate_db.py --drop
-python seed_azure_db.py
-
-# Option B: Add tables only (preserves existing data)
+# Create all tables (automatically drops existing tables)
 python migrate_db.py
+
+# Add sample data
 python seed_azure_db.py
 ```
+
+**Note:** `migrate_db.py` always drops and recreates all tables to ensure correct schema.
 
 ## Step 4: Run Backend (30 seconds)
 
