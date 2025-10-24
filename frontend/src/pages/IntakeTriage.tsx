@@ -289,8 +289,15 @@ export function IntakeTriage() {
       )}
 
       {selectedRequest && !showStateSelector && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-hidden" onClick={() => setSelectedRequest(null)}>
-          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col bg-card rounded-lg border shadow-sm" onClick={e => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" 
+          onClick={() => setSelectedRequest(null)}
+          style={{ overflow: 'hidden', overscrollBehavior: 'contain' }}
+        >
+          <div 
+            className="max-w-2xl w-full max-h-[80vh] flex flex-col bg-card rounded-lg border shadow-sm" 
+            onClick={e => e.stopPropagation()}
+          >
             <div className="flex-shrink-0 border-b p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -304,7 +311,14 @@ export function IntakeTriage() {
                 </Button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-scroll p-6 space-y-4 min-h-0" style={{ maxHeight: 'calc(80vh - 100px)' }}>
+            <div 
+              className="flex-1 overflow-y-scroll p-6 space-y-4 min-h-0" 
+              style={{ 
+                maxHeight: 'calc(80vh - 100px)',
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain'
+              }}
+            >
               {selectedRequest.description && (
                 <div>
                   <h4 className="font-medium mb-1">Description</h4>
@@ -340,6 +354,33 @@ export function IntakeTriage() {
                 <p className="text-muted-foreground">{formatHelpTypes(parseHelpTypes(selectedRequest.help_types))}</p>
               </div>
 
+              {selectedRequest.additional_details && (() => {
+                try {
+                  const details = JSON.parse(selectedRequest.additional_details);
+                  const entries = Object.entries(details);
+                  if (entries.length > 0) {
+                    return (
+                      <div>
+                        <h4 className="font-medium mb-2">Additional Details</h4>
+                        <div className="space-y-2 bg-muted/30 p-4 rounded-lg">
+                          {entries.map(([key, value]) => (
+                            <div key={key}>
+                              <p className="text-sm font-medium capitalize">{key.replace(/_/g, ' ')}</p>
+                              <p className="text-sm text-muted-foreground mt-0.5">
+                                {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                } catch (e) {
+                  return null;
+                }
+                return null;
+              })()}
+
               <div>
                 <h4 className="font-medium mb-2">Current States</h4>
                 <div className="flex flex-wrap gap-2">
@@ -360,6 +401,12 @@ export function IntakeTriage() {
                     <p className="text-sm text-muted-foreground">No states assigned yet</p>
                   )}
                 </div>
+              </div>
+
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground">
+                  Last updated: {formatDistanceToNow(new Date(selectedRequest.updated_at), { addSuffix: true })}
+                </p>
               </div>
             </div>
           </div>
