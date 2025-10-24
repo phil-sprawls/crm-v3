@@ -79,6 +79,7 @@ class IntakeRequestCreate(BaseModel):
     functional_area: Optional[str] = None
     help_types: Optional[str] = None
     platform: Optional[str] = None
+    additional_details: Optional[str] = None
 
 
 class IntakeRequestUpdate(BaseModel):
@@ -90,6 +91,7 @@ class IntakeRequestUpdate(BaseModel):
     functional_area: Optional[str] = None
     help_types: Optional[str] = None
     platform: Optional[str] = None
+    additional_details: Optional[str] = None
 
 
 class RequestStateCreate(BaseModel):
