@@ -31,6 +31,7 @@ interface IntakeRequest {
   functional_area: string;
   help_types: string;
   platform: string;
+  additional_details: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -51,6 +52,25 @@ export function IntakeTriage() {
   const [selectedRequest, setSelectedRequest] = useState<IntakeRequest | null>(null);
   const [showStateSelector, setShowStateSelector] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Lock body scroll when modal is open (Safari fix)
+  useEffect(() => {
+    if (selectedRequest || showStateSelector) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [selectedRequest, showStateSelector]);
 
   const loadRequests = async () => {
     try {
