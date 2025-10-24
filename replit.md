@@ -232,6 +232,18 @@ cd frontend && npx playwright test
 - Reusable UI components following shadcn/UI patterns
 
 ## Recent Changes
+- **2025-10-24**: Fixed critical bugs in intake system
+  - **Bug Fix**: Resolved database connection timeout causing submit button to fail on first try
+    - Added SQLAlchemy connection pooling with `pool_pre_ping=True` to test connections before use
+    - Configured pool recycling (1 hour), pool size (10), and max overflow (20 connections)
+    - Prevents SSL connection timeout errors with Azure PostgreSQL
+  - **Bug Fix**: Fixed modal scroll issue in Intake Triage
+    - Changed modal from `overflow-auto` to flexbox layout with scrollable content area
+    - Header now fixed, content area scrolls independently
+    - Users can now properly scroll through long request details
+  - **Enhancement**: Added `additional_details` TEXT field to IntakeRequest model
+    - Stores conditional form responses as JSON
+    - Migration script and seeding script updated to include new column
 - **2025-10-22**: Enhanced migration script
   - Added `--drop` flag to migrate_db.py for recreating tables with correct schema
   - Ensures all columns from models.py are included in CREATE TABLE statements

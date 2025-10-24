@@ -5,7 +5,17 @@ import os
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
-engine = create_engine(DATABASE_URL, connect_args=connect_args, echo=True)
+
+# Add connection pooling with pre-ping to handle dropped connections
+engine = create_engine(
+    DATABASE_URL, 
+    connect_args=connect_args, 
+    echo=True,
+    pool_pre_ping=True,  # Test connections before using them
+    pool_recycle=3600,   # Recycle connections after 1 hour
+    pool_size=10,        # Connection pool size
+    max_overflow=20      # Allow up to 20 overflow connections
+)
 
 
 def create_db_and_tables():

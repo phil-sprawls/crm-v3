@@ -290,8 +290,8 @@ export function IntakeTriage() {
 
       {selectedRequest && !showStateSelector && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedRequest(null)}>
-          <Card className="max-w-2xl w-full max-h-[80vh] overflow-auto" onClick={e => e.stopPropagation()}>
-            <CardHeader>
+          <Card className="max-w-2xl w-full max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <CardHeader className="flex-shrink-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle>{selectedRequest.title}</CardTitle>
@@ -304,7 +304,7 @@ export function IntakeTriage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 overflow-y-auto flex-1">
               {selectedRequest.description && (
                 <div>
                   <h4 className="font-medium mb-1">Description</h4>
