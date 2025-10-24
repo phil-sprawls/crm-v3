@@ -377,44 +377,200 @@ export function IntakeTriage() {
               {selectedRequest.additional_details && (() => {
                 try {
                   const details = JSON.parse(selectedRequest.additional_details);
-                  const entries = Object.entries(details);
-                  if (entries.length > 0) {
-                    const formatLabel = (key: string) => {
-                      return key
-                        .split('_')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-                    };
+                  if (Object.keys(details).length === 0) return null;
 
-                    const formatValue = (value: any) => {
-                      if (value === null || value === undefined) return 'N/A';
-                      if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-                      if (Array.isArray(value)) return value.join(', ');
-                      if (typeof value === 'object') return JSON.stringify(value, null, 2);
-                      return String(value);
-                    };
+                  const parseArray = (val: any) => {
+                    try {
+                      return typeof val === 'string' ? JSON.parse(val) : val;
+                    } catch {
+                      return val;
+                    }
+                  };
 
-                    return (
-                      <div>
-                        <h4 className="font-medium mb-2">Additional Details</h4>
-                        <div className="bg-muted/30 rounded-lg overflow-hidden">
-                          {entries.map(([key, value], index) => (
-                            <div 
-                              key={key} 
-                              className={`p-3 ${index % 2 === 0 ? 'bg-muted/20' : ''}`}
-                            >
-                              <p className="text-sm font-medium text-foreground mb-1">
-                                {formatLabel(key)}
-                              </p>
-                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                {formatValue(value)}
+                  const formatArray = (arr: any[]) => arr.join(', ');
+
+                  const hasConsultation = details.consultation_help_with || details.use_case_details;
+                  const hasNewEnv = details.env_preferences || details.languages || details.primary_function || details.integrations_text;
+                  const hasEnhancement = details.environment_name || details.platform_preferences || details.integrations_description;
+                  const hasCloudStorage = details.describe_data || details.who_accessing || details.how_consumed;
+
+                  return (
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Additional Request Details</h4>
+
+                      {hasConsultation && (
+                        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
+                          <h5 className="font-medium text-blue-900 dark:text-blue-100">Consultation Details</h5>
+                          
+                          {details.consultation_help_with && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">I need help with</p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatArray(parseArray(details.consultation_help_with))}
                               </p>
                             </div>
-                          ))}
+                          )}
+                          
+                          {details.use_case_details && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Use Case Details</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.use_case_details}</p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    );
-                  }
+                      )}
+
+                      {hasNewEnv && (
+                        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-3">
+                          <h5 className="font-medium text-green-900 dark:text-green-100">New Environment Details</h5>
+                          
+                          {details.env_preferences && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Environment Preferences</p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatArray(parseArray(details.env_preferences))}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {details.languages && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Languages</p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatArray(parseArray(details.languages))}
+                                {details.other_language && ` (Other: ${details.other_language})`}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {details.primary_function && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Primary Function</p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatArray(parseArray(details.primary_function))}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {details.integrations_text && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">
+                                Integrations <span className="text-xs font-normal text-muted-foreground">(What technologies would you like your Environment to integrate with?)</span>
+                              </p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.integrations_text}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {hasEnhancement && (
+                        <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-3">
+                          <h5 className="font-medium text-purple-900 dark:text-purple-100">Environment Enhancement Details</h5>
+                          
+                          {details.environment_name && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Environment Name</p>
+                              <p className="text-sm text-muted-foreground">{details.environment_name}</p>
+                            </div>
+                          )}
+                          
+                          {details.platform_preferences && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Platform Preferences</p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatArray(parseArray(details.platform_preferences))}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {details.integrations_description && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">
+                                Integrations <span className="text-xs font-normal text-muted-foreground">(Use this box to describe integration needs)</span>
+                              </p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.integrations_description}</p>
+                            </div>
+                          )}
+                          
+                          {(details.asa_spark_pool || details.asa_dedicated_sql_pool || details.asa_shir || details.asa_manage_access || details.asa_other_resources) && (
+                            <div className="border-t border-purple-200 dark:border-purple-700 pt-3 mt-3 space-y-3">
+                              <h6 className="text-sm font-semibold">ASA Resources</h6>
+                              
+                              {details.asa_spark_pool && (
+                                <div>
+                                  <p className="text-sm font-medium mb-1">Spark Pool</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatArray(parseArray(details.asa_spark_pool))}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {details.asa_dedicated_sql_pool && (
+                                <div>
+                                  <p className="text-sm font-medium mb-1">Dedicated SQL Pool</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatArray(parseArray(details.asa_dedicated_sql_pool))}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {details.asa_shir && (
+                                <div>
+                                  <p className="text-sm font-medium mb-1">SHIR</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatArray(parseArray(details.asa_shir))}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {details.asa_manage_access && (
+                                <div>
+                                  <p className="text-sm font-medium mb-1">Manage Access To</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatArray(parseArray(details.asa_manage_access))}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {details.asa_other_resources && (
+                                <div>
+                                  <p className="text-sm font-medium mb-1">Other Resources</p>
+                                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.asa_other_resources}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {hasCloudStorage && (
+                        <div className="bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4 space-y-3">
+                          <h5 className="font-medium text-cyan-900 dark:text-cyan-100">Cloud Storage Details</h5>
+                          
+                          {details.describe_data && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Describe your data</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.describe_data}</p>
+                            </div>
+                          )}
+                          
+                          {details.who_accessing && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">Who will be accessing your data</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.who_accessing}</p>
+                            </div>
+                          )}
+                          
+                          {details.how_consumed && (
+                            <div>
+                              <p className="text-sm font-medium mb-1">How will your data be consumed</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{details.how_consumed}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
                 } catch (e) {
                   return null;
                 }
