@@ -379,15 +379,35 @@ export function IntakeTriage() {
                   const details = JSON.parse(selectedRequest.additional_details);
                   const entries = Object.entries(details);
                   if (entries.length > 0) {
+                    const formatLabel = (key: string) => {
+                      return key
+                        .split('_')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                    };
+
+                    const formatValue = (value: any) => {
+                      if (value === null || value === undefined) return 'N/A';
+                      if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+                      if (Array.isArray(value)) return value.join(', ');
+                      if (typeof value === 'object') return JSON.stringify(value, null, 2);
+                      return String(value);
+                    };
+
                     return (
                       <div>
                         <h4 className="font-medium mb-2">Additional Details</h4>
-                        <div className="space-y-2 bg-muted/30 p-4 rounded-lg">
-                          {entries.map(([key, value]) => (
-                            <div key={key}>
-                              <p className="text-sm font-medium capitalize">{key.replace(/_/g, ' ')}</p>
-                              <p className="text-sm text-muted-foreground mt-0.5">
-                                {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
+                        <div className="bg-muted/30 rounded-lg overflow-hidden">
+                          {entries.map(([key, value], index) => (
+                            <div 
+                              key={key} 
+                              className={`p-3 ${index % 2 === 0 ? 'bg-muted/20' : ''}`}
+                            >
+                              <p className="text-sm font-medium text-foreground mb-1">
+                                {formatLabel(key)}
+                              </p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                {formatValue(value)}
                               </p>
                             </div>
                           ))}
