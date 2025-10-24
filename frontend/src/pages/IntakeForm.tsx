@@ -72,6 +72,33 @@ export function IntakeForm() {
     platform: '',
   });
   const [selectedHelpTypes, setSelectedHelpTypes] = useState<string[]>([]);
+  
+  // Consultation fields
+  const [consultationHelpWith, setConsultationHelpWith] = useState<string[]>([]);
+  const [useCaseDetails, setUseCaseDetails] = useState('');
+  
+  // New Environment fields
+  const [envPreferences, setEnvPreferences] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [otherLanguage, setOtherLanguage] = useState('');
+  const [primaryFunction, setPrimaryFunction] = useState<string[]>([]);
+  const [integrationsText, setIntegrationsText] = useState('');
+  
+  // Environment Enhancement fields
+  const [environmentName, setEnvironmentName] = useState('');
+  const [platformPreferences, setPlatformPreferences] = useState<string[]>([]);
+  const [integrationsDescription, setIntegrationsDescription] = useState('');
+  const [asaSparkPool, setAsaSparkPool] = useState<string[]>([]);
+  const [asaDedicatedSqlPool, setAsaDedicatedSqlPool] = useState<string[]>([]);
+  const [asaShir, setAsaShir] = useState<string[]>([]);
+  const [asaManageAccess, setAsaManageAccess] = useState<string[]>([]);
+  const [asaOtherResources, setAsaOtherResources] = useState('');
+  
+  // Cloud Storage fields
+  const [describeData, setDescribeData] = useState('');
+  const [whoAccessing, setWhoAccessing] = useState('');
+  const [howConsumed, setHowConsumed] = useState('');
+  
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -106,6 +133,14 @@ export function IntakeForm() {
     );
   };
 
+  const toggleCheckbox = (value: string, state: string[], setState: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setState(prev => 
+      prev.includes(value) 
+        ? prev.filter(v => v !== value)
+        : [...prev, value]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -117,9 +152,45 @@ export function IntakeForm() {
     
     setSubmitting(true);
     try {
+      const additionalData: any = {};
+      
+      // Add conditional data based on selected help types
+      if (selectedHelpTypes.includes('consultation')) {
+        additionalData.consultation_help_with = JSON.stringify(consultationHelpWith);
+        additionalData.use_case_details = useCaseDetails;
+      }
+      
+      if (selectedHelpTypes.includes('new_environment')) {
+        additionalData.env_preferences = JSON.stringify(envPreferences);
+        additionalData.languages = JSON.stringify(languages);
+        additionalData.other_language = otherLanguage;
+        additionalData.primary_function = JSON.stringify(primaryFunction);
+        additionalData.integrations_text = integrationsText;
+      }
+      
+      if (selectedHelpTypes.includes('enhancement')) {
+        additionalData.environment_name = environmentName;
+        additionalData.platform_preferences = JSON.stringify(platformPreferences);
+        additionalData.integrations_description = integrationsDescription;
+        if (platformPreferences.includes('ASA')) {
+          additionalData.asa_spark_pool = JSON.stringify(asaSparkPool);
+          additionalData.asa_dedicated_sql_pool = JSON.stringify(asaDedicatedSqlPool);
+          additionalData.asa_shir = JSON.stringify(asaShir);
+          additionalData.asa_manage_access = JSON.stringify(asaManageAccess);
+          additionalData.asa_other_resources = asaOtherResources;
+        }
+      }
+      
+      if (selectedHelpTypes.includes('cloud_storage')) {
+        additionalData.describe_data = describeData;
+        additionalData.who_accessing = whoAccessing;
+        additionalData.how_consumed = howConsumed;
+      }
+      
       await axios.post(`${API_BASE_URL}/api/intake-requests`, {
         ...formData,
         help_types: JSON.stringify(selectedHelpTypes),
+        additional_details: JSON.stringify(additionalData)
       });
       
       setShowSuccessModal(true);
@@ -149,6 +220,7 @@ export function IntakeForm() {
           <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
             <li>Fill out all required fields marked with an asterisk (*)</li>
             <li>Select one or more options for what type of help you need</li>
+            <li>Answer the follow-up questions for each selected option</li>
             <li>Provide as much detail as possible in the description</li>
             <li>Submit the form and our team will review your request</li>
             <li>You'll receive an email confirmation once your request is reviewed</li>
@@ -339,6 +411,364 @@ export function IntakeForm() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Consultation Questions */}
+        {selectedHelpTypes.includes('consultation') && (
+          <Card className="border-2 border-blue-200 dark:border-blue-800">
+            <CardHeader className="bg-blue-50 dark:bg-blue-950/30">
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                Consultation Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  I need help with
+                </label>
+                <div className="space-y-2">
+                  {['Understanding general UDAP functionality', 'Understanding my UDAP environment', 'Something else'].map(option => (
+                    <label key={option} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={consultationHelpWith.includes(option)}
+                        onChange={() => toggleCheckbox(option, consultationHelpWith, setConsultationHelpWith)}
+                        className="mr-2"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label htmlFor="use_case_details" className="block text-sm font-medium mb-1">
+                  Use Case Details
+                </label>
+                <textarea
+                  id="use_case_details"
+                  value={useCaseDetails}
+                  onChange={(e) => setUseCaseDetails(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Describe your use case in detail..."
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* New Environment Questions */}
+        {selectedHelpTypes.includes('new_environment') && (
+          <Card className="border-2 border-green-200 dark:border-green-800">
+            <CardHeader className="bg-green-50 dark:bg-green-950/30">
+              <CardTitle className="flex items-center gap-2">
+                <PlusCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                New Environment Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Environment Preferences
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['ASA', 'Databricks', 'Prefect', 'Snowflake'].map(option => (
+                    <label key={option} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={envPreferences.includes(option)}
+                        onChange={() => toggleCheckbox(option, envPreferences, setEnvPreferences)}
+                        className="mr-2"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Languages
+                </label>
+                <div className="space-y-2">
+                  {['SQL', 'Python'].map(option => (
+                    <label key={option} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={languages.includes(option)}
+                        onChange={() => toggleCheckbox(option, languages, setLanguages)}
+                        className="mr-2"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={languages.includes('Other')}
+                      onChange={() => toggleCheckbox('Other', languages, setLanguages)}
+                      className="mr-2"
+                    />
+                    Other
+                  </label>
+                  {languages.includes('Other') && (
+                    <Input
+                      value={otherLanguage}
+                      onChange={(e) => setOtherLanguage(e.target.value)}
+                      placeholder="Specify other language..."
+                      className="mt-2 ml-6"
+                    />
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Primary Function
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Analytics/Reporting', 'Machine Learning', 'ETL/ELT', 'Workflow Orchestration'].map(option => (
+                    <label key={option} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={primaryFunction.includes(option)}
+                        onChange={() => toggleCheckbox(option, primaryFunction, setPrimaryFunction)}
+                        className="mr-2"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label htmlFor="integrations_text" className="block text-sm font-medium mb-1">
+                  Integrations
+                  <span className="text-muted-foreground text-xs ml-1">(What technologies would you like your Environment to integrate with?)</span>
+                </label>
+                <textarea
+                  id="integrations_text"
+                  value={integrationsText}
+                  onChange={(e) => setIntegrationsText(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Describe integration needs..."
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Environment Enhancement Questions */}
+        {selectedHelpTypes.includes('enhancement') && (
+          <Card className="border-2 border-purple-200 dark:border-purple-800">
+            <CardHeader className="bg-purple-50 dark:bg-purple-950/30">
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                Environment Enhancement Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div>
+                <label htmlFor="environment_name" className="block text-sm font-medium mb-1">
+                  Environment Name
+                </label>
+                <Input
+                  id="environment_name"
+                  value={environmentName}
+                  onChange={(e) => setEnvironmentName(e.target.value)}
+                  placeholder="Enter environment name..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Platform Preferences
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['ASA', 'Databricks', 'Prefect', 'Snowflake'].map(option => (
+                    <label key={option} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={platformPreferences.includes(option)}
+                        onChange={() => toggleCheckbox(option, platformPreferences, setPlatformPreferences)}
+                        className="mr-2"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label htmlFor="integrations_description" className="block text-sm font-medium mb-1">
+                  Integrations
+                  <span className="text-muted-foreground text-xs ml-1">(Use this box to describe integration needs)</span>
+                </label>
+                <textarea
+                  id="integrations_description"
+                  value={integrationsDescription}
+                  onChange={(e) => setIntegrationsDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Describe integration needs..."
+                />
+              </div>
+              
+              {platformPreferences.includes('ASA') && (
+                <div className="border-t pt-4 space-y-4">
+                  <h4 className="font-semibold text-sm">ASA Resources</h4>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Spark Pool
+                    </label>
+                    <div className="flex gap-4">
+                      {['Create', 'Delete'].map(option => (
+                        <label key={option} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={asaSparkPool.includes(option)}
+                            onChange={() => toggleCheckbox(option, asaSparkPool, setAsaSparkPool)}
+                            className="mr-2"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Dedicated SQL Pool
+                    </label>
+                    <div className="flex gap-4">
+                      {['Create', 'Delete'].map(option => (
+                        <label key={option} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={asaDedicatedSqlPool.includes(option)}
+                            onChange={() => toggleCheckbox(option, asaDedicatedSqlPool, setAsaDedicatedSqlPool)}
+                            className="mr-2"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      SHIR
+                    </label>
+                    <div className="flex gap-4">
+                      {['Create', 'Delete', 'Scale'].map(option => (
+                        <label key={option} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={asaShir.includes(option)}
+                            onChange={() => toggleCheckbox(option, asaShir, setAsaShir)}
+                            className="mr-2"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Manage Access To
+                    </label>
+                    <div className="space-y-2">
+                      {['Dedicated SQL Pool Schema', 'Pipeline', 'Dataflow'].map(option => (
+                        <label key={option} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={asaManageAccess.includes(option)}
+                            onChange={() => toggleCheckbox(option, asaManageAccess, setAsaManageAccess)}
+                            className="mr-2"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="asa_other_resources" className="block text-sm font-medium mb-1">
+                      Other Resources
+                    </label>
+                    <textarea
+                      id="asa_other_resources"
+                      value={asaOtherResources}
+                      onChange={(e) => setAsaOtherResources(e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder="Describe other ASA resource needs..."
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cloud Storage Questions */}
+        {selectedHelpTypes.includes('cloud_storage') && (
+          <Card className="border-2 border-cyan-200 dark:border-cyan-800">
+            <CardHeader className="bg-cyan-50 dark:bg-cyan-950/30">
+              <CardTitle className="flex items-center gap-2">
+                <Cloud className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                Cloud Storage Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div>
+                <label htmlFor="describe_data" className="block text-sm font-medium mb-1">
+                  Describe your data
+                </label>
+                <textarea
+                  id="describe_data"
+                  value={describeData}
+                  onChange={(e) => setDescribeData(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Describe the data you need to store..."
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="who_accessing" className="block text-sm font-medium mb-1">
+                  Who will be accessing your data
+                </label>
+                <textarea
+                  id="who_accessing"
+                  value={whoAccessing}
+                  onChange={(e) => setWhoAccessing(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Describe who needs access..."
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="how_consumed" className="block text-sm font-medium mb-1">
+                  How will your data be consumed
+                </label>
+                <textarea
+                  id="how_consumed"
+                  value={howConsumed}
+                  onChange={(e) => setHowConsumed(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Describe how the data will be used..."
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex gap-4 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate('/')}>

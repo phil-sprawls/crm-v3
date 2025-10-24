@@ -173,6 +173,7 @@ def migrate_database():
                     functional_area VARCHAR,
                     help_types VARCHAR,
                     platform VARCHAR,
+                    additional_details TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )

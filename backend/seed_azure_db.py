@@ -145,18 +145,18 @@ def seed_database():
                 INSERT INTO intake_requests (
                     title, description, functional_area, dri_contact, 
                     submitted_for, has_it_partner, help_types, platform,
-                    created_at, updated_at
+                    additional_details, created_at, updated_at
                 )
                 VALUES 
                     ('Need Databricks Access for Sales Analytics', 
                      'Our sales team needs access to Databricks for building sales forecasting models',
                      'Sales', 'Jennifer Lee', 'jennifer.lee@company.com', false, 
-                     'Platform Access,Training', 'Databricks',
+                     'Platform Access,Training', 'Databricks', NULL,
                      :date1, :date1),
                     ('Power BI Dashboard Consultation',
                      'Looking for help designing executive dashboard in Power BI',
                      'Finance', 'Michael Chang', 'michael.chang@company.com', true,
-                     'Consultation/Questions,Environment Enhancement', 'Power Platform',
+                     'Consultation/Questions,Environment Enhancement', 'Power Platform', NULL,
                      :date2, :date2)
             """), {
                 'date1': (today - timedelta(hours=17)),

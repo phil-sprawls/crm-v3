@@ -86,6 +86,7 @@ class IntakeRequest(SQLModel, table=True):
     functional_area: Optional[str] = None
     help_types: Optional[str] = None
     platform: Optional[str] = None
+    additional_details: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

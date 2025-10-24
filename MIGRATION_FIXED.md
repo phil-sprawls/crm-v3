@@ -81,11 +81,11 @@ id, account_uid, primary_it_partner
 id, name, color, description, created_at
 ```
 
-### intake_requests (11 columns)
+### intake_requests (12 columns)
 ```sql
 id, title, description, has_it_partner, dri_contact,
 submitted_for, functional_area, help_types, platform,
-created_at, updated_at
+additional_details, created_at, updated_at
 ```
 
 ### request_state_assignments (4 columns)
