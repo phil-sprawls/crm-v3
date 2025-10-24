@@ -289,8 +289,8 @@ export function IntakeTriage() {
       )}
 
       {selectedRequest && !showStateSelector && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedRequest(null)}>
-          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden bg-card rounded-lg border shadow-sm" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-hidden" onClick={() => setSelectedRequest(null)}>
+          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col bg-card rounded-lg border shadow-sm" onClick={e => e.stopPropagation()}>
             <div className="flex-shrink-0 border-b p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -304,7 +304,7 @@ export function IntakeTriage() {
                 </Button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
+            <div className="flex-1 overflow-y-scroll p-6 space-y-4 min-h-0" style={{ maxHeight: 'calc(80vh - 100px)' }}>
               {selectedRequest.description && (
                 <div>
                   <h4 className="font-medium mb-1">Description</h4>
