@@ -6,385 +6,176 @@
 
 ---
 
-## Table of Contents
-1. [accounts](#1-accounts)
-2. [use_cases](#2-use_cases)
-3. [updates](#3-updates)
-4. [platforms_crm](#4-platforms_crm)
-5. [primary_it_partners](#5-primary_it_partners)
-6. [intake_requests](#6-intake_requests)
-7. [request_states](#7-request_states)
-8. [request_state_assignments](#8-request_state_assignments)
-9. [Relationships Diagram](#relationships-diagram)
+## All Tables - Column Reference
+
+| Table Name | Column Name | Data Type | Nullable | Key | Description |
+|------------|-------------|-----------|----------|-----|-------------|
+| accounts | uid | VARCHAR | No | PK | Unique identifier for the account (Primary Key) |
+| accounts | team | VARCHAR | Yes | | Team or group name |
+| accounts | business_it_area | VARCHAR | Yes | | Business or IT functional area |
+| accounts | vp | VARCHAR | Yes | | Vice President or executive sponsor |
+| accounts | team_admin | VARCHAR | Yes | | Team administrator or point of contact |
+| accounts | use_case | VARCHAR | Yes | | Primary use case description |
+| accounts | use_case_status | VARCHAR | Yes | | Status of the primary use case |
+| accounts | databricks | VARCHAR | Yes | | Databricks onboarding status |
+| accounts | month_onboarded_db | DATE | Yes | | Month when onboarded to Databricks |
+| accounts | snowflake | VARCHAR | Yes | | Snowflake onboarding status |
+| accounts | month_onboarded_sf | DATE | Yes | | Month when onboarded to Snowflake |
+| accounts | north_star_domain | VARCHAR | Yes | | North star domain or strategic area |
+| accounts | business_or_it | VARCHAR | Yes | | Classification as Business or IT team |
+| accounts | centerwell_or_insurance | VARCHAR | Yes | | Centerwell or Insurance classification |
+| accounts | git_repo | VARCHAR | Yes | | Git repository URL |
+| accounts | unique_identifier | VARCHAR | Yes | | Additional unique identifier for the team |
+| accounts | associated_ado_items | VARCHAR | Yes | | Associated Azure DevOps work items (URLs or IDs) |
+| accounts | team_artifacts | VARCHAR | Yes | | Links to team documentation or artifacts |
+| accounts | current_tech_stack | VARCHAR | Yes | | Current technology stack description |
+| accounts | ad_groups | VARCHAR | Yes | | Active Directory groups associated with team |
+| accounts | notes | VARCHAR | Yes | | General notes about the account |
+| accounts | csm | VARCHAR | Yes | | Customer Success Manager assigned |
+| accounts | health | VARCHAR | Yes | | Account health status (Green/Yellow/Red) |
+| accounts | health_reason | VARCHAR | Yes | | Explanation for current health status |
+| use_cases | id | INTEGER | No | PK | Auto-incrementing primary key |
+| use_cases | account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
+| use_cases | problem | VARCHAR | Yes | | Problem statement or business challenge |
+| use_cases | solution | VARCHAR | Yes | | Solution description |
+| use_cases | value | VARCHAR | Yes | | Business value or expected outcome |
+| use_cases | leader | VARCHAR | Yes | | Use case leader or owner |
+| use_cases | status | VARCHAR | Yes | | Current status of the use case |
+| use_cases | enablement_tier | VARCHAR | Yes | | Enablement tier (e.g., Self-Service, Guided, Managed) |
+| use_cases | platform | VARCHAR | Yes | | Platform used for this use case (Databricks, Snowflake, etc.) |
+| updates | id | INTEGER | No | PK | Auto-incrementing primary key |
+| updates | account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
+| updates | description | VARCHAR | Yes | | Update description or activity note |
+| updates | author | VARCHAR | Yes | | Person who created the update |
+| updates | platform | VARCHAR | Yes | | Platform related to this update |
+| updates | date | DATE | Yes | | Date of the update |
+| platforms_crm | id | INTEGER | No | PK | Auto-incrementing primary key |
+| platforms_crm | account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
+| platforms_crm | platform_name | VARCHAR | Yes | | Platform name (Databricks, Snowflake, Power Platform, Fabric) |
+| platforms_crm | onboarding_status | VARCHAR | Yes | | Onboarding status for this platform |
+| primary_it_partners | id | INTEGER | No | PK | Auto-incrementing primary key |
+| primary_it_partners | account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
+| primary_it_partners | primary_it_partner | VARCHAR | Yes | | Name of the primary IT partner assigned to the account |
+| intake_requests | id | INTEGER | No | PK | Auto-incrementing primary key |
+| intake_requests | title | VARCHAR | No | | Short title/summary of the request |
+| intake_requests | description | VARCHAR | Yes | | Detailed description of the request |
+| intake_requests | has_it_partner | BOOLEAN | No | | Whether the requester has an IT partner (default: false) |
+| intake_requests | dri_contact | VARCHAR | Yes | | Directly Responsible Individual contact information |
+| intake_requests | submitted_for | VARCHAR | Yes | | Team or person the request is submitted for |
+| intake_requests | functional_area | VARCHAR | Yes | | Functional area (Finance, Marketing, Sales, Operations, HR, IT, Product, Engineering, Customer Success, Legal, R&D, Supply Chain) |
+| intake_requests | help_types | VARCHAR | Yes | | JSON array of help types (consultation, build, new_environment, enhancement, cloud_storage) |
+| intake_requests | platform | VARCHAR | Yes | | Target platform (Databricks, Snowflake, Power Platform, Fabric) |
+| intake_requests | additional_details | TEXT | Yes | | JSON object containing conditional form responses based on help_types |
+| intake_requests | created_at | TIMESTAMP | No | | Timestamp when request was created (auto-generated UTC) |
+| intake_requests | updated_at | TIMESTAMP | No | | Timestamp when request was last updated (auto-generated UTC) |
+| request_states | id | INTEGER | No | PK | Auto-incrementing primary key |
+| request_states | name | VARCHAR | No | | State name (e.g., New, In Progress, Completed) |
+| request_states | color | VARCHAR | Yes | | Hex color code for UI display (e.g., #10b981) |
+| request_states | description | VARCHAR | Yes | | Description of what this state represents |
+| request_states | created_at | TIMESTAMP | No | | Timestamp when state was created (auto-generated UTC) |
+| request_state_assignments | id | INTEGER | No | PK | Auto-incrementing primary key |
+| request_state_assignments | request_id | INTEGER | No | FK | Foreign key to intake_requests.id |
+| request_state_assignments | state_id | INTEGER | No | FK | Foreign key to request_states.id |
+| request_state_assignments | assigned_at | TIMESTAMP | No | | Timestamp when state was assigned to request (auto-generated UTC) |
 
 ---
 
-## 1. accounts
+## Table Relationships
 
-**Purpose**: Main table storing team/account information for platform onboarding tracking.
-
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| uid | VARCHAR | No | PK | Unique identifier for the account (Primary Key) |
-| team | VARCHAR | Yes | | Team or group name |
-| business_it_area | VARCHAR | Yes | | Business or IT functional area |
-| vp | VARCHAR | Yes | | Vice President or executive sponsor |
-| team_admin | VARCHAR | Yes | | Team administrator or point of contact |
-| use_case | VARCHAR | Yes | | Primary use case description |
-| use_case_status | VARCHAR | Yes | | Status of the primary use case |
-| databricks | VARCHAR | Yes | | Databricks onboarding status |
-| month_onboarded_db | DATE | Yes | | Month when onboarded to Databricks |
-| snowflake | VARCHAR | Yes | | Snowflake onboarding status |
-| month_onboarded_sf | DATE | Yes | | Month when onboarded to Snowflake |
-| north_star_domain | VARCHAR | Yes | | North star domain or strategic area |
-| business_or_it | VARCHAR | Yes | | Classification as Business or IT team |
-| centerwell_or_insurance | VARCHAR | Yes | | Centerwell or Insurance classification |
-| git_repo | VARCHAR | Yes | | Git repository URL |
-| unique_identifier | VARCHAR | Yes | | Additional unique identifier for the team |
-| associated_ado_items | VARCHAR | Yes | | Associated Azure DevOps work items (URLs or IDs) |
-| team_artifacts | VARCHAR | Yes | | Links to team documentation or artifacts |
-| current_tech_stack | VARCHAR | Yes | | Current technology stack description |
-| ad_groups | VARCHAR | Yes | | Active Directory groups associated with team |
-| notes | VARCHAR | Yes | | General notes about the account |
-| csm | VARCHAR | Yes | | Customer Success Manager assigned |
-| health | VARCHAR | Yes | | Account health status (Green/Yellow/Red) |
-| health_reason | VARCHAR | Yes | | Explanation for current health status |
-
-**Relationships**:
-- **One-to-Many** with `use_cases` (one account has many use cases)
-- **One-to-Many** with `updates` (one account has many updates)
-- **One-to-Many** with `platforms_crm` (one account has many platform onboarding records)
-- **One-to-One** with `primary_it_partners` (one account has one primary IT partner)
+| Parent Table | Child Table | Relationship Type | Foreign Key | Description |
+|--------------|-------------|-------------------|-------------|-------------|
+| accounts | use_cases | One-to-Many | use_cases.account_uid | One account has many use cases |
+| accounts | updates | One-to-Many | updates.account_uid | One account has many updates |
+| accounts | platforms_crm | One-to-Many | platforms_crm.account_uid | One account has many platform records |
+| accounts | primary_it_partners | One-to-One | primary_it_partners.account_uid | One account has one primary IT partner |
+| intake_requests | request_state_assignments | One-to-Many | request_state_assignments.request_id | One request can have many state assignments |
+| request_states | request_state_assignments | One-to-Many | request_state_assignments.state_id | One state can be assigned to many requests |
+| intake_requests | request_states | Many-to-Many | Via request_state_assignments | Requests and states have many-to-many relationship |
 
 ---
 
-## 2. use_cases
+## Additional Details JSON Schema (intake_requests.additional_details)
 
-**Purpose**: Stores individual use cases associated with accounts.
-
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
-| problem | VARCHAR | Yes | | Problem statement or business challenge |
-| solution | VARCHAR | Yes | | Solution description |
-| value | VARCHAR | Yes | | Business value or expected outcome |
-| leader | VARCHAR | Yes | | Use case leader or owner |
-| status | VARCHAR | Yes | | Current status of the use case |
-| enablement_tier | VARCHAR | Yes | | Enablement tier (e.g., Self-Service, Guided, Managed) |
-| platform | VARCHAR | Yes | | Platform used for this use case (Databricks, Snowflake, etc.) |
-
-**Joins**:
-```sql
--- Get all use cases for an account
-SELECT * FROM use_cases WHERE account_uid = 'ACCOUNT_UID';
-
--- Get use cases with account details
-SELECT u.*, a.team, a.vp 
-FROM use_cases u
-JOIN accounts a ON u.account_uid = a.uid;
-```
+| Help Type | Field Name | Data Type | Description |
+|-----------|------------|-----------|-------------|
+| consultation | consultation_help_with | JSON Array | Array of consultation topics selected |
+| consultation | use_case_details | Text | Detailed description of use case |
+| new_environment | env_preferences | JSON Array | Environment preferences (ASA, Databricks, Prefect, Snowflake) |
+| new_environment | languages | JSON Array | Languages needed (SQL, Python, Other) |
+| new_environment | other_language | Text | Other language specification if selected |
+| new_environment | primary_function | JSON Array | Primary functions (Analytics/Reporting, Machine Learning, ETL/ELT, Workflow Orchestration) |
+| new_environment | integrations_text | Text | Description of integration needs |
+| enhancement | environment_name | Text | Name of environment to enhance |
+| enhancement | platform_preferences | JSON Array | Platform preferences for enhancement |
+| enhancement | integrations_description | Text | Description of integration needs |
+| enhancement | asa_spark_pool | JSON Array | Spark Pool operations (Create, Delete) |
+| enhancement | asa_dedicated_sql_pool | JSON Array | Dedicated SQL Pool operations (Create, Delete) |
+| enhancement | asa_shir | JSON Array | SHIR operations (Create, Delete, Scale) |
+| enhancement | asa_manage_access | JSON Array | Access management needs (Dedicated SQL Pool Schema, Pipeline, Dataflow) |
+| enhancement | asa_other_resources | Text | Other ASA resource needs description |
+| cloud_storage | describe_data | Text | Description of data to store |
+| cloud_storage | who_accessing | Text | Description of who needs access to data |
+| cloud_storage | how_consumed | Text | Description of how data will be consumed |
 
 ---
 
-## 3. updates
+## Reference Data Values
 
-**Purpose**: Stores activity updates and progress notes for accounts.
+### Functional Areas (intake_requests.functional_area)
 
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
-| description | VARCHAR | Yes | | Update description or activity note |
-| author | VARCHAR | Yes | | Person who created the update |
-| platform | VARCHAR | Yes | | Platform related to this update |
-| date | DATE | Yes | | Date of the update |
+| Value |
+|-------|
+| Finance |
+| Marketing |
+| Sales |
+| Operations |
+| HR |
+| IT |
+| Product |
+| Engineering |
+| Customer Success |
+| Legal |
+| R&D |
+| Supply Chain |
 
-**Joins**:
-```sql
--- Get all updates for an account
-SELECT * FROM updates WHERE account_uid = 'ACCOUNT_UID' ORDER BY date DESC;
+### Platforms
 
--- Get recent updates across all accounts
-SELECT u.*, a.team 
-FROM updates u
-JOIN accounts a ON u.account_uid = a.uid
-ORDER BY u.date DESC;
-```
+| Value |
+|-------|
+| Databricks |
+| Snowflake |
+| Power Platform |
+| Fabric |
 
----
+### Help Types (intake_requests.help_types)
 
-## 4. platforms_crm
+| Value | Display Label |
+|-------|---------------|
+| consultation | Consultation/Questions |
+| build | Build Something |
+| new_environment | New Environment |
+| enhancement | Environment Enhancement |
+| cloud_storage | Cloud Storage for Downstream Consumers |
 
-**Purpose**: Tracks platform onboarding status for each account (renamed to avoid conflicts with existing database tables).
+### Default Request States
 
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
-| platform_name | VARCHAR | Yes | | Platform name (Databricks, Snowflake, Power Platform, Fabric) |
-| onboarding_status | VARCHAR | Yes | | Onboarding status for this platform |
-
-**Joins**:
-```sql
--- Get all platforms for an account
-SELECT * FROM platforms_crm WHERE account_uid = 'ACCOUNT_UID';
-
--- Get all accounts onboarded to Databricks
-SELECT a.*, p.onboarding_status 
-FROM accounts a
-JOIN platforms_crm p ON a.uid = p.account_uid
-WHERE p.platform_name = 'Databricks';
-```
-
----
-
-## 5. primary_it_partners
-
-**Purpose**: Stores the primary IT partner assignment for each account.
-
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| account_uid | VARCHAR | No | FK | Foreign key to accounts.uid |
-| primary_it_partner | VARCHAR | Yes | | Name of the primary IT partner assigned to the account |
-
-**Joins**:
-```sql
--- Get IT partner for an account
-SELECT * FROM primary_it_partners WHERE account_uid = 'ACCOUNT_UID';
-
--- Get all accounts with their IT partners
-SELECT a.team, a.vp, p.primary_it_partner 
-FROM accounts a
-LEFT JOIN primary_it_partners p ON a.uid = p.account_uid;
-```
-
----
-
-## 6. intake_requests
-
-**Purpose**: Stores intake requests submitted by users for platform help and support.
-
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| title | VARCHAR | No | | Short title/summary of the request |
-| description | VARCHAR | Yes | | Detailed description of the request |
-| has_it_partner | BOOLEAN | No | | Whether the requester has an IT partner (default: false) |
-| dri_contact | VARCHAR | Yes | | Directly Responsible Individual contact information |
-| submitted_for | VARCHAR | Yes | | Team or person the request is submitted for |
-| functional_area | VARCHAR | Yes | | Functional area (Finance, Marketing, Sales, Operations, etc.) |
-| help_types | VARCHAR | Yes | | JSON array of help types (consultation, build, new_environment, enhancement, cloud_storage) |
-| platform | VARCHAR | Yes | | Target platform (Databricks, Snowflake, Power Platform, Fabric) |
-| additional_details | TEXT | Yes | | JSON object containing conditional form responses based on help_types |
-| created_at | TIMESTAMP | No | | Timestamp when request was created (auto-generated) |
-| updated_at | TIMESTAMP | No | | Timestamp when request was last updated (auto-generated) |
-
-**Additional Details Schema**: The `additional_details` column stores a JSON object with conditional fields based on `help_types`:
-
-**Consultation Fields**:
-- `consultation_help_with`: JSON array of consultation topics
-- `use_case_details`: Text description of use case
-
-**New Environment Fields**:
-- `env_preferences`: JSON array of environment preferences (ASA, Databricks, Prefect, Snowflake)
-- `languages`: JSON array of languages (SQL, Python, Other)
-- `other_language`: Text for other language if specified
-- `primary_function`: JSON array of primary functions (Analytics/Reporting, Machine Learning, ETL/ELT, Workflow Orchestration)
-- `integrations_text`: Text description of integration needs
-
-**Enhancement Fields**:
-- `environment_name`: Text name of environment to enhance
-- `platform_preferences`: JSON array of platform preferences
-- `integrations_description`: Text description of integration needs
-- `asa_spark_pool`: JSON array of Spark Pool operations (Create, Delete)
-- `asa_dedicated_sql_pool`: JSON array of SQL Pool operations (Create, Delete)
-- `asa_shir`: JSON array of SHIR operations (Create, Delete, Scale)
-- `asa_manage_access`: JSON array of access management needs
-- `asa_other_resources`: Text description of other ASA resources
-
-**Cloud Storage Fields**:
-- `describe_data`: Text description of data to store
-- `who_accessing`: Text description of who needs access
-- `how_consumed`: Text description of how data will be consumed
-
-**Relationships**:
-- **Many-to-Many** with `request_states` through `request_state_assignments` (one request can have multiple states)
-
-**Joins**:
-```sql
--- Get all requests with their states
-SELECT ir.*, rs.name as state_name, rs.color as state_color
-FROM intake_requests ir
-LEFT JOIN request_state_assignments rsa ON ir.id = rsa.request_id
-LEFT JOIN request_states rs ON rsa.state_id = rs.id
-ORDER BY ir.created_at DESC;
-
--- Get requests by functional area
-SELECT * FROM intake_requests 
-WHERE functional_area = 'Finance' 
-ORDER BY created_at DESC;
-```
-
----
-
-## 7. request_states
-
-**Purpose**: Stores customizable workflow states for intake requests (e.g., New, In Progress, Completed).
-
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| name | VARCHAR | No | | State name (e.g., "New", "In Progress", "Completed") |
-| color | VARCHAR | Yes | | Hex color code for UI display (e.g., "#10b981") |
-| description | VARCHAR | Yes | | Description of what this state represents |
-| created_at | TIMESTAMP | No | | Timestamp when state was created (auto-generated) |
-
-**Default States**:
-1. New (gray) - Initial state for new requests
-2. In Review (blue) - Request is being reviewed
-3. Assigned (purple) - Request has been assigned to someone
-4. In Progress (yellow) - Work is in progress
-5. Blocked (red) - Request is blocked
-6. Completed (green) - Request is complete
-7. Rejected (orange) - Request was rejected
-
-**Relationships**:
-- **Many-to-Many** with `intake_requests` through `request_state_assignments`
-
-**Joins**:
-```sql
--- Get all active states
-SELECT * FROM request_states ORDER BY name;
-
--- Get requests with a specific state
-SELECT ir.* 
-FROM intake_requests ir
-JOIN request_state_assignments rsa ON ir.id = rsa.request_id
-JOIN request_states rs ON rsa.state_id = rs.id
-WHERE rs.name = 'In Progress';
-```
-
----
-
-## 8. request_state_assignments
-
-**Purpose**: Junction table creating many-to-many relationship between intake requests and request states. Allows multiple states per request and tracks assignment timestamps.
-
-| Column Name | Data Type | Nullable | Key | Description |
-|------------|-----------|----------|-----|-------------|
-| id | INTEGER | No | PK | Auto-incrementing primary key |
-| request_id | INTEGER | No | FK | Foreign key to intake_requests.id |
-| state_id | INTEGER | No | FK | Foreign key to request_states.id |
-| assigned_at | TIMESTAMP | No | | Timestamp when state was assigned to request (auto-generated) |
-
-**Relationships**:
-- **Many-to-One** with `intake_requests` (many assignments belong to one request)
-- **Many-to-One** with `request_states` (many assignments use one state)
-
-**Joins**:
-```sql
--- Get all states for a specific request
-SELECT rs.name, rs.color, rsa.assigned_at
-FROM request_state_assignments rsa
-JOIN request_states rs ON rsa.state_id = rs.id
-WHERE rsa.request_id = 1
-ORDER BY rsa.assigned_at DESC;
-
--- Get all requests with a specific state
-SELECT ir.*, rsa.assigned_at
-FROM intake_requests ir
-JOIN request_state_assignments rsa ON ir.id = rsa.request_id
-WHERE rsa.state_id = 3;
-
--- Remove a state from a request
-DELETE FROM request_state_assignments 
-WHERE request_id = 1 AND state_id = 2;
-```
-
----
-
-## Relationships Diagram
-
-```
-┌─────────────────┐
-│    accounts     │
-│  (uid: PK)      │
-└────────┬────────┘
-         │
-         │ 1:N
-         │
-    ┌────┴────┬─────────┬──────────┐
-    │         │         │          │
-    ▼         ▼         ▼          ▼
-┌─────────┐ ┌────────┐ ┌──────────────┐ ┌─────────────────────┐
-│use_cases│ │updates │ │platforms_crm │ │primary_it_partners  │
-│         │ │        │ │              │ │                     │
-└─────────┘ └────────┘ └──────────────┘ └─────────────────────┘
-
-┌──────────────────┐         ┌─────────────────────────┐         ┌────────────────┐
-│intake_requests   │         │request_state_assignments│         │request_states  │
-│  (id: PK)        │ ◄───N:M─┤ (junction table)        ├───N:M──►│  (id: PK)      │
-└──────────────────┘         └─────────────────────────┘         └────────────────┘
-```
-
-**Cardinality Legend**:
-- `1:N` = One-to-Many
-- `N:M` = Many-to-Many (through junction table)
-- `1:1` = One-to-One
-
----
-
-## Functional Area Values
-
-Standard values for `intake_requests.functional_area`:
-- Finance
-- Marketing
-- Sales
-- Operations
-- HR
-- IT
-- Product
-- Engineering
-- Customer Success
-- Legal
-- R&D
-- Supply Chain
-
----
-
-## Platform Values
-
-Standard values for platform fields across tables:
-- Databricks
-- Snowflake
-- Power Platform
-- Fabric
-
----
-
-## Help Type Values
-
-Standard values stored in `intake_requests.help_types` (JSON array):
-- `consultation` - Consultation/Questions
-- `build` - Build Something
-- `new_environment` - New Environment Setup
-- `enhancement` - Environment Enhancement
-- `cloud_storage` - Cloud Storage for Downstream Consumers
+| Name | Color | Description |
+|------|-------|-------------|
+| New | #6b7280 | Initial state for new requests |
+| In Review | #3b82f6 | Request is being reviewed |
+| Assigned | #8b5cf6 | Request has been assigned to someone |
+| In Progress | #eab308 | Work is in progress |
+| Blocked | #ef4444 | Request is blocked |
+| Completed | #10b981 | Request is complete |
+| Rejected | #f97316 | Request was rejected |
 
 ---
 
 ## Notes
 
-1. **Cascade Deletions**: When an account is deleted, all related records in `use_cases`, `updates`, `platforms_crm`, and `primary_it_partners` are manually deleted by the application.
-
-2. **JSON Fields**: The `help_types` and `additional_details` fields in `intake_requests` store JSON data as VARCHAR/TEXT.
-
-3. **Timestamps**: All timestamp fields use UTC timezone (`datetime.utcnow()`).
-
-4. **Optional Fields**: Most fields are nullable (optional) to allow flexibility in data entry.
-
-5. **Primary Keys**: All tables use auto-incrementing integer primary keys except `accounts` which uses a string UID.
-
-6. **Audit Trail**: `intake_requests` and `request_state_assignments` include timestamp fields for tracking when records were created/assigned.
+- **Cascade Deletions**: When an account is deleted, all related records in use_cases, updates, platforms_crm, and primary_it_partners are manually deleted by the application
+- **JSON Fields**: The help_types and additional_details fields in intake_requests store JSON data as VARCHAR/TEXT
+- **Timestamps**: All timestamp fields use UTC timezone (datetime.utcnow())
+- **Optional Fields**: Most fields are nullable to allow flexibility in data entry
+- **Primary Keys**: All tables use auto-incrementing integer PKs except accounts which uses a string UID
+- **Audit Trail**: intake_requests and request_state_assignments include timestamp fields for tracking
